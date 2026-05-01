@@ -22,13 +22,12 @@ export const botConfig = {
     // 3 = Watching
     // 4 = Custom
     // 5 = Competing
+    // Rotates every 30 seconds. Add/remove entries here to customize.
+    // type: 0=Playing, 2=Listening, 3=Watching, 5=Competing
     activities: [
-      {
-        // Text users will see (example: "Playing /help | Titan Bot").
-        name: "clan zen on top",
-        // Activity type number (0 = Playing).
-        type: 0, 
-      },
+      { name: "clan zen on top", type: 0 },
+      { name: "/help", type: 3 },
+      { name: "zen vibes", type: 2 },
     ],
   },
 
@@ -136,7 +135,7 @@ export const botConfig = {
     },
     footer: {
       // Default footer text used in bot embeds.
-      text: "Titan Bot",
+      text: "itay100k bot",
       // Footer icon URL (null = no icon).
       icon: null,
     },

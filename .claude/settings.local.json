@@ -6,7 +6,8 @@
       "Bash(Format-Table)",
       "PowerShell(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\" -Recurse -Force | Where-Object { $_.PSIsContainer } | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\('c:\\\\code\\\\zen-bot\\\\', ''\\) } | Sort-Object)",
       "PowerShell(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\" -Name -Force | Where-Object { $_ -match 'CLAUDE|cursor' })",
-      "PowerShell(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\\\\commands\" | Where-Object { $_.PSIsContainer } | ForEach-Object { $_.Name })"
+      "PowerShell(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\\\\commands\" | Where-Object { $_.PSIsContainer } | ForEach-Object { $_.Name })",
+      "Bash(docker compose *)"
     ]
   }
 }

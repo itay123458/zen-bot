@@ -9,7 +9,25 @@ export default {
 
   async execute(client) {
     try {
-      client.user.setPresence(config.bot.presence);
+      const { status, activities } = config.bot.presence;
+      let activityIndex = 0;
+
+      const setActivity = () => {
+        client.user.setPresence({
+          status,
+          activities: [activities[activityIndex]],
+        });
+        activityIndex = (activityIndex + 1) % activities.length;
+      };
+
+      setActivity();
+      setInterval(setActivity, 30_000);
+
+      if (client.user.username !== 'itay100k bot') {
+        await client.user.setUsername('itay100k bot').catch(err =>
+          logger.warn('Could not update bot username (rate limited?):', err.message)
+        );
+      }
 
       startupLog(`Ready! Logged in as ${client.user.tag}`);
       startupLog(`Serving ${client.guilds.cache.size} guild(s)`);
