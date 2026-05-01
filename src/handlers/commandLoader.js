@@ -171,15 +171,22 @@ const registeredNames = new Set();
         }
         
         const totalCommandsWithSubs = commands.length + totalSubcommands;
-        
+
+        const MAX_COMMANDS = 100;
+        let commandsToRegister = commands;
+        if (commands.length > MAX_COMMANDS) {
+            logger.warn(`Command count (${commands.length}) exceeds Discord limit (${MAX_COMMANDS}), truncating...`);
+            commandsToRegister = commands.slice(0, MAX_COMMANDS);
+        }
+
         if (guildId) {
-            
-            logger.info(`Preparing to register ${totalCommandsWithSubs} commands for guild ${guildId}`);
-            
+
+            logger.info(`Preparing to register ${commandsToRegister.length} commands for guild ${guildId}`);
+
             logger.info('Validating commands before registration...');
-            
+
             let validationErrors = [];
-            commands.forEach((cmd, index) => {
+            commandsToRegister.forEach((cmd, index) => {
                 if (cmd.name && cmd.name.length > 32) {
                     validationErrors.push(`Command ${cmd.name} has name longer than 32 chars: "${cmd.name}" (${cmd.name.length} chars)`);
                 }
@@ -245,15 +252,6 @@ const registeredNames = new Set();
             const existingCommands = await guild.commands.fetch();
             logger.info(`Found ${existingCommands.size} existing guild commands`);
             
-            const MAX_COMMANDS = 100;
-            let commandsToRegister = commands;
-            
-            if (commands.length > MAX_COMMANDS) {
-                logger.warn(`Command count (${commands.length}) exceeds Discord limit (${MAX_COMMANDS}), truncating...`);
-                commandsToRegister = commands.slice(0, MAX_COMMANDS);
-                logger.info(`Truncated to ${commandsToRegister.length} commands for registration`);
-            }
-            
             if (process.env.NODE_ENV !== 'production') {
                 logger.info(`Registering ${totalCommandsWithSubs} commands for guild ${guild.name} (${guild.id})`);
             }
@@ -288,7 +286,12 @@ const registeredNames = new Set();
                 throw error;
             }
         } else {
-            logger.info('Skipping global command registration - bot is guild-only');
+            logger.info(`Registering ${commandsToRegister.length} commands globally...`);
+
+            await client.application.commands.set(commandsToRegister);
+
+            logger.info(`Successfully registered ${commandsToRegister.length} global commands`);
+            logger.info('Note: global commands can take up to 1 hour to appear in all servers');
         }
     } catch (error) {
         logger.error('Error registering commands:', error);

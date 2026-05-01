@@ -301,7 +301,18 @@ class TitanBot extends Client {
 
   async registerCommands() {
     try {
-      await registerSlashCommands(this, this.config.bot.guildId);
+      // Clear leftover guild-specific commands if a guild ID is configured
+      if (this.config.bot.guildId) {
+        try {
+          const guild = await this.guilds.fetch(this.config.bot.guildId);
+          await guild.commands.set([]);
+          logger.info('Cleared guild-specific commands — now using global registration');
+        } catch (e) {
+          logger.warn('Could not clear guild commands:', e.message);
+        }
+      }
+      // Pass null to register globally (works across all servers)
+      await registerSlashCommands(this, null);
     } catch (error) {
       logger.error('Error registering commands:', error);
     }

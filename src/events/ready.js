@@ -30,6 +30,9 @@ export default {
       }
 
       startupLog(`Ready! Logged in as ${client.user.tag}`);
+
+      const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot+applications.commands&permissions=8`;
+      startupLog(`Invite link: ${inviteUrl}`);
       startupLog(`Serving ${client.guilds.cache.size} guild(s)`);
       startupLog(`Loaded ${client.commands.size} commands`);
 
