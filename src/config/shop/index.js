@@ -4,7 +4,7 @@
 
 
 import { shopItems, getItemById, getItemsByType, getItemPrice, validatePurchase } from './items.js';
-import { botConfig } from '../bot.js';
+import botConfig from '../bot.js';
 
 const { currency } = botConfig.economy;
 
