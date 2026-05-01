@@ -1,5 +1,12 @@
 export const changelog = [
     {
+        version: '2.1.1',
+        date: '2026-05-01',
+        entries: [
+            { type: 'new',     text: 'Added `/changelog` — post the bot changelog to any channel (admin only)' },
+        ],
+    },
+    {
         version: '2.1.0',
         date: '2026-05-01',
         entries: [
