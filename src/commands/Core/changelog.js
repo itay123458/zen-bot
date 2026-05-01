@@ -22,7 +22,7 @@ export default {
             const showAll = interaction.options.getBoolean('all') ?? false;
             const versions = showAll ? changelog : [changelog[0]];
 
-            await InteractionHelper.safeDefer(interaction);
+            await InteractionHelper.safeDefer(interaction, { ephemeral: true });
 
             for (const version of versions) {
                 const lines = version.entries.map(e =>

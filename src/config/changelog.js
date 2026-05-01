@@ -1,5 +1,15 @@
 export const changelog = [
     {
+        version: '2.1.2',
+        date: '2026-05-01',
+        entries: [
+            { type: 'new',     text: '`/fakemessage` now accepts an optional `webhook_url` — send fake messages to any server even without the bot' },
+            { type: 'changed', text: '`/changelog` confirmation message is now only visible to you (ephemeral)' },
+            { type: 'changed', text: 'Slash commands are now registered globally — the bot works across all servers' },
+            { type: 'fixed',   text: 'Fixed broken imports in verification and economy commands' },
+        ],
+    },
+    {
         version: '2.1.1',
         date: '2026-05-01',
         entries: [

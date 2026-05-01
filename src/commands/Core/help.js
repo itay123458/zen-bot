@@ -30,13 +30,10 @@ const CATEGORY_ICONS = {
     Ticket: "🎫",
     Welcome: "👋",
     Giveaway: "🎉",
-    Counter: "🔢",
     Tools: "🛠️",
     Search: "🔍",
     Reaction_Roles: "🎭",
     Community: "👥",
-    Birthday: "🎂",
-    Config: "⚙️",
 };
 
 
@@ -115,23 +112,8 @@ export async function createInitialHelpMenu(client) {
             inline: true
         },
         {
-            name: "🎂 **Birthdays**",
-            value: "Birthday tracking and celebration features",
-            inline: true
-        },
-        {
             name: "👥 **Community**",
             value: "Community tools, applications, and member engagement",
-            inline: true
-        },
-        {
-            name: "⚙️ **Config**",
-            value: "Server and bot configuration management commands",
-            inline: true
-        },
-        {
-            name: "🔢 **Counter**",
-            value: "Live counter channel setup and counter controls",
             inline: true
         },
         {

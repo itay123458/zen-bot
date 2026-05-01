@@ -13,7 +13,7 @@
 
 
 import { PermissionFlagsBits } from 'discord.js';
-import { botConfig } from '../config/bot.js';
+import botConfig from '../config/bot.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from './guildConfig.js';
 import { createError, ErrorTypes } from '../utils/errorHandler.js';
