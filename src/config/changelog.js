@@ -1,5 +1,16 @@
 export const changelog = [
     {
+        version: '2.2.0',
+        date: '2026-05-01',
+        entries: [
+            { type: 'new',     text: 'Added `/joke` — get a random joke (pun, programming, dark, misc)' },
+            { type: 'new',     text: 'Added `/meme` — get a random meme from Reddit' },
+            { type: 'new',     text: 'Added `/quote` — get a random inspirational quote' },
+            { type: 'new',     text: 'Added `/github` — look up any GitHub user or repository' },
+            { type: 'removed', text: 'Removed economy system (balance, shop, daily, gamble, etc.)' },
+        ],
+    },
+    {
         version: '2.1.2',
         date: '2026-05-01',
         entries: [

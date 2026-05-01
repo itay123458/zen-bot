@@ -23,7 +23,6 @@ const HELP_MENU_TIMEOUT_MS = 5 * 60 * 1000;
 const CATEGORY_ICONS = {
     Core: "ℹ️",
     Moderation: "🛡️",
-    Economy: "💰",
     Fun: "🎮",
     Leveling: "📊",
     Utility: "🔧",
@@ -140,7 +139,7 @@ export async function createInitialHelpMenu(client) {
         },
         {
             name: "🔍 **Search**",
-            value: "Search YouTube, Wikipedia, and more",
+            value: "Search YouTube, Wikipedia, GitHub, and more",
             inline: true
         }
     );
