@@ -55,17 +55,19 @@ export async function createInitialHelpMenu(client) {
             description: "View all available commands with pagination",
             value: ALL_COMMANDS_ID,
         },
-        ...categoryDirs.map((category) => {
-            const categoryName =
-                category.charAt(0).toUpperCase() +
-                category.slice(1).toLowerCase();
-            const icon = CATEGORY_ICONS[categoryName] || "🔍";
-            return {
-                label: `${icon} ${categoryName}`,
-                description: `View commands in the ${categoryName} category`,
-                value: category,
-            };
-        }),
+        ...categoryDirs
+            .filter((category) => category.toLowerCase() !== 'economy')
+            .map((category) => {
+                const categoryName =
+                    category.charAt(0).toUpperCase() +
+                    category.slice(1).toLowerCase();
+                const icon = CATEGORY_ICONS[categoryName] || "🔍";
+                return {
+                    label: `${icon} ${categoryName}`,
+                    description: `View commands in the ${categoryName} category`,
+                    value: category,
+                };
+            }),
     ];
 
     const botName = client?.user?.username || "Bot";
@@ -79,11 +81,6 @@ export async function createInitialHelpMenu(client) {
         {
             name: "🛡️ **Moderation**",
             value: "Server moderation, user management, and enforcement tools",
-            inline: true
-        },
-        {
-            name: "💰 **Economy**",
-            value: "Currency system, shops, and virtual economy",
             inline: true
         },
         {
@@ -134,6 +131,16 @@ export async function createInitialHelpMenu(client) {
         {
             name: "🔧 **Utilities**",
             value: "Useful tools and server utilities",
+            inline: true
+        },
+        {
+            name: "🛠️ **Tools**",
+            value: "Embed builder, polls, and other creation tools",
+            inline: true
+        },
+        {
+            name: "🔍 **Search**",
+            value: "Search YouTube, Wikipedia, and more",
             inline: true
         }
     );

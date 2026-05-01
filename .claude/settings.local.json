@@ -11,7 +11,10 @@
       "Bash(git rm *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\\\\commands\\\\Economy\" -Recurse | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"c:\\\\code\\\\zen-bot\\\\\", \"\"\\) })"
     ]
   }
 }
