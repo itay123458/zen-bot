@@ -1,5 +1,13 @@
 export const changelog = [
     {
+        version: '2.3.0',
+        date: '2026-05-02',
+        entries: [
+            { type: 'new', text: 'Added `?` prefix commands — use commands without slash: `?joke`, `?meme`, `?quote`, `?flip`, `?roll`, `?avatar`, `?fact`, `?github`' },
+            { type: 'new', text: 'Type `?help` to see all available prefix commands' },
+        ],
+    },
+    {
         version: '2.2.0',
         date: '2026-05-01',
         entries: [
