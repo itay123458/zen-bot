@@ -8,6 +8,7 @@ import { logger } from '../utils/logger.js';
 import { getLevelingConfig, getUserLevelData } from '../services/leveling.js';
 import { addXp } from '../services/xpSystem.js';
 import { checkRateLimit } from '../utils/rateLimiter.js';
+import { AutoresponderService } from '../services/autoresponderService.js';
 
 const MESSAGE_XP_RATE_LIMIT_ATTEMPTS = 12;
 const MESSAGE_XP_RATE_LIMIT_WINDOW_MS = 10000;
@@ -24,6 +25,7 @@ export default {
         return;
       }
 
+      await AutoresponderService.check(client, message);
       await handleLeveling(message, client);
     } catch (error) {
       logger.error('Error in messageCreate event:', error);

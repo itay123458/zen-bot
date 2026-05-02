@@ -1,5 +1,13 @@
 export const changelog = [
     {
+        version: '2.4.0',
+        date: '2026-05-02',
+        entries: [
+            { type: 'new', text: 'Added `/autoresponder` — set up automatic replies to trigger words/phrases (supports contains, exact, and starts-with matching). Use `{user}` in the response to mention the sender.' },
+            { type: 'new', text: 'Added `/temprole` — assign a role that automatically expires after a set duration (e.g. `30m`, `2h`, `1d`, `1w`). Roles are removed automatically by a background job.' },
+        ],
+    },
+    {
         version: '2.3.0',
         date: '2026-05-02',
         entries: [
