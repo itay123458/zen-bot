@@ -18,7 +18,8 @@
       "Bash(Get-ChildItem -Path 'c:\\\\code\\\\zen-bot\\\\src\\\\commands' -Recurse -File)",
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
-      "Bash(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\\\\commands\" -Recurse -Filter \"*.js\")"
+      "Bash(Get-ChildItem -Path \"c:\\\\code\\\\zen-bot\\\\src\\\\commands\" -Recurse -Filter \"*.js\")",
+      "Bash(git -C \"/c/code/zen-bot\" log --oneline -5)"
     ]
   }
 }

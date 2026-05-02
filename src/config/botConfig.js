@@ -28,7 +28,8 @@ export const botConfig = {
       { name: "/help", type: 3 },
       { name: "zen vibes", type: 2 },
       { name: "itay100k build this bot", type: 5 },
-      
+      { name: "https://discord.gg/3znmrNRS7x", type: 0 },
+
     ],
   },
 
