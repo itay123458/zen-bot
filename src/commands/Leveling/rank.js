@@ -30,7 +30,7 @@ export default {
 
   async execute(interaction, config, client) {
     try {
-      await InteractionHelper.safeDefer(interaction);
+      await InteractionHelper.safeDefer(interaction, { ephemeral: true });
 
       const levelingConfig = await getLevelingConfig(client, interaction.guildId);
       if (!levelingConfig?.enabled) {

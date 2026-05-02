@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError, TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -40,7 +40,7 @@ export default {
         `Original: **${sanitizedText}**\nReversed: **${reversedText}**`,
       );
 
-      await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+      await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
       logger.debug(`Reverse command executed by user ${interaction.user.id} in guild ${interaction.guildId}`);
     } catch (error) {
       logger.error('Reverse command error:', error);

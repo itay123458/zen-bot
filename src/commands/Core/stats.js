@@ -10,7 +10,7 @@ export default {
 
   async execute(interaction) {
     try {
-      await InteractionHelper.safeDefer(interaction);
+      await InteractionHelper.safeDefer(interaction, { ephemeral: true });
       
       const totalGuilds = interaction.client.guilds.cache.size;
       const totalMembers = interaction.client.guilds.cache.reduce(

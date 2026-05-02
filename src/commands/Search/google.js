@@ -25,7 +25,7 @@ export default {
             })
             .setFooter({ text: 'Google Search Results' });
 
-            await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
             
             logger.info('Google search link generated', {
                 userId: interaction.user.id,

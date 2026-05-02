@@ -19,7 +19,7 @@ export default {
 
     async execute(interaction) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction);
+            const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
             if (!deferSuccess) {
                 logger.warn(`Weather interaction defer failed`, {
                     userId: interaction.user.id,

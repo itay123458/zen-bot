@@ -17,7 +17,7 @@ export default {
     async execute(interaction) {
         try {
             
-            const deferred = await InteractionHelper.safeDefer(interaction);
+            const deferred = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
             if (!deferred) {
                 return;
             }

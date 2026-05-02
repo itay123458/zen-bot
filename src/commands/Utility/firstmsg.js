@@ -13,7 +13,7 @@ export default {
 
     async execute(interaction, config, client) {
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction);
+            const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
             if (!deferSuccess) {
                 logger.warn(`FirstMsg interaction defer failed`, {
                     userId: interaction.user.id,

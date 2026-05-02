@@ -126,7 +126,7 @@ export default {
         .setDescription("Displays commands available to you based on your permissions"),
 
     async execute(interaction, guildConfig, client) {
-        await InteractionHelper.safeDefer(interaction);
+        await InteractionHelper.safeDefer(interaction, { ephemeral: true });
 
         const { embeds, components } = await createInitialHelpMenu(client, interaction.member);
 

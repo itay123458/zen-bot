@@ -9,7 +9,7 @@ export default {
         .setDescription("Checks the bot's latency and API speed"),
 
     async execute(interaction) {
-        const deferSuccess = await InteractionHelper.safeDefer(interaction);
+        const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
         if (!deferSuccess) {
             logger.warn(`Ping interaction defer failed`, {
                 userId: interaction.user.id,

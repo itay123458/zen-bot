@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError, TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
@@ -25,7 +25,7 @@ export default {
 
       const embed = successEmbed("🧠 Did You Know?", `💡 **${randomFact}**`);
 
-      await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+      await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
       logger.debug(`Fact command executed by user ${interaction.user.id} in guild ${interaction.guildId}`);
     } catch (error) {
       logger.error('Fact command error:', error);

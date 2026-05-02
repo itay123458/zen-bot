@@ -14,7 +14,7 @@ export default {
 
     async execute(interaction) {
         try {
-            await InteractionHelper.safeDefer(interaction);
+            await InteractionHelper.safeDefer(interaction, { ephemeral: true });
 
             const query = interaction.options.getString('query').trim();
             const isRepo = query.includes('/');

@@ -34,7 +34,7 @@ export default {
 
     async execute(interaction, config, client) {
         try {
-            await InteractionHelper.safeDefer(interaction);
+            await InteractionHelper.safeDefer(interaction, { ephemeral: true });
 
             const [guildConfig, loggingStatus, levelingConfig, welcomeConfig, applicationConfig, joinToCreateConfig] =
                 await Promise.all([

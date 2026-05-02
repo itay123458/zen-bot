@@ -54,7 +54,7 @@ export default {
             };
 
             deferTimer = setTimeout(() => {
-                InteractionHelper.safeDefer(interaction).catch((deferError) => {
+                InteractionHelper.safeDefer(interaction, { ephemeral: true }).catch((deferError) => {
                     logger.debug('Urban command defer fallback failed', {
                         error: deferError?.message,
                         interactionId: interaction.id,
@@ -71,7 +71,8 @@ export default {
             
             if (!response.data?.list?.length) {
                 return await InteractionHelper.safeReply(interaction, {
-                    embeds: [errorEmbed('Not Found', `No definitions found for "${term}" on Urban Dictionary.`)]
+                    embeds: [errorEmbed('Not Found', `No definitions found for "${term}" on Urban Dictionary.`)],
+                    flags: [MessageFlags.Ephemeral],
                 });
             }
             
@@ -115,7 +116,7 @@ export default {
                 iconURL: 'https://i.imgur.com/8aQrX3a.png' 
             });
                 
-            await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
             
             logger.info('Urban Dictionary definition retrieved', {
                 userId: interaction.user.id,

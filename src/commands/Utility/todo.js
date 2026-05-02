@@ -170,7 +170,7 @@ export default {
         }
 
         try {
-            const deferSuccess = await InteractionHelper.safeDefer(interaction);
+            const deferSuccess = await InteractionHelper.safeDefer(interaction, { ephemeral: true });
             if (!deferSuccess) {
                 logger.warn(`Todo interaction defer failed`, {
                     userId: interaction.user.id,

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError } from '../../utils/errorHandler.js';
@@ -33,7 +33,7 @@ export default {
                 color: 'blurple',
             });
 
-            await InteractionHelper.safeReply(interaction, { embeds: [embed] });
+            await InteractionHelper.safeReply(interaction, { embeds: [embed], flags: [MessageFlags.Ephemeral] });
             logger.debug(`Avatar command used for ${targetUser.id} by ${interaction.user.id}`);
         } catch (error) {
             logger.error('Avatar command error:', error);
