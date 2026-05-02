@@ -1,5 +1,12 @@
 export const changelog = [
     {
+        version: '2.4.2',
+        date: '2026-05-02',
+        entries: [
+            { type: 'new', text: 'Added `/transferownership` — transfer server ownership to another member with a confirmation prompt (server owner only)' },
+        ],
+    },
+    {
         version: '2.4.1',
         date: '2026-05-02',
         entries: [
