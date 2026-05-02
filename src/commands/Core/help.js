@@ -1,4 +1,4 @@
-﻿import {
+import {
     SlashCommandBuilder,
     ActionRowBuilder,
     ButtonBuilder,
@@ -6,9 +6,8 @@
 } from "discord.js";
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { createEmbed } from "../../utils/embeds.js";
-import {
-    createSelectMenu,
-} from "../../utils/components.js";
+import { createSelectMenu } from "../../utils/components.js";
+import { getAccessibleCategories } from "../../handlers/helpSelectMenus.js";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,26 +19,27 @@ const CATEGORY_SELECT_ID = "help-category-select";
 const ALL_COMMANDS_ID = "help-all-commands";
 const HELP_MENU_TIMEOUT_MS = 5 * 60 * 1000;
 
-const CATEGORY_ICONS = {
-    Core: "ℹ️",
-    Moderation: "🛡️",
-    Fun: "🎮",
-    Leveling: "📊",
-    Utility: "🔧",
-    Ticket: "🎫",
-    Welcome: "👋",
-    Giveaway: "🎉",
-    Tools: "🛠️",
-    Search: "🔍",
-    Reaction_Roles: "🎭",
-    Community: "👥",
+const CATEGORY_INFO = {
+    Core:           { icon: "ℹ️",  desc: "Core bot commands and information" },
+    Moderation:     { icon: "🛡️",  desc: "Server moderation, user management, and enforcement tools" },
+    Fun:            { icon: "🎮",  desc: "Games, entertainment, and interactive commands" },
+    Leveling:       { icon: "📊",  desc: "User levels, XP system, and progression tracking" },
+    Utility:        { icon: "🔧",  desc: "Useful tools and server utilities" },
+    Ticket:         { icon: "🎫",  desc: "Support ticket system for server management" },
+    Welcome:        { icon: "👋",  desc: "Member welcome messages and onboarding" },
+    Giveaway:       { icon: "🎉",  desc: "Automated giveaway management and distribution" },
+    Tools:          { icon: "🛠️",  desc: "Embed builder, polls, and other creation tools" },
+    Search:         { icon: "🔍",  desc: "Search YouTube, Wikipedia, GitHub, and more" },
+    Reaction_roles: { icon: "🎭",  desc: "Self-assignable roles using reaction-role systems" },
+    Community:      { icon: "👥",  desc: "Community tools, applications, and member engagement" },
+    Jointocreate:   { icon: "🎙️",  desc: "Dynamic voice channel creation and management" },
+    Verification:   { icon: "✅",  desc: "Member verification workflows and access gating" },
+    Serverstats:    { icon: "📈",  desc: "Server statistics and display counters" },
+    Logging:        { icon: "📋",  desc: "Server event logging and audit trails" },
+    Voice:          { icon: "🔊",  desc: "Voice channel commands and activities" },
 };
 
-
-
-
-
-export async function createInitialHelpMenu(client) {
+export async function createInitialHelpMenu(client, member) {
     const commandsPath = path.join(__dirname, "../../commands");
     const categoryDirs = (
         await fs.readdir(commandsPath, { withFileTypes: true })
@@ -48,105 +48,57 @@ export async function createInitialHelpMenu(client) {
         .map((dirent) => dirent.name)
         .sort();
 
+    // Build the set of categories this member has access to
+    const accessibleCategories = getAccessibleCategories(client, member);
+
+    const filteredCategories = categoryDirs.filter((category) => {
+        if (category.toLowerCase() === 'economy') return false;
+        if (!accessibleCategories) return true; // no member (DM) → show all
+        return accessibleCategories.has(category);
+    });
+
     const options = [
         {
             label: "📋 All Commands",
-            description: "View all available commands with pagination",
+            description: "View all commands available to you",
             value: ALL_COMMANDS_ID,
         },
-        ...categoryDirs
-            .filter((category) => category.toLowerCase() !== 'economy')
-            .map((category) => {
-                const categoryName =
-                    category.charAt(0).toUpperCase() +
-                    category.slice(1).toLowerCase();
-                const icon = CATEGORY_ICONS[categoryName] || "🔍";
-                return {
-                    label: `${icon} ${categoryName}`,
-                    description: `View commands in the ${categoryName} category`,
-                    value: category,
-                };
-            }),
+        ...filteredCategories.map((category) => {
+            const categoryName =
+                category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+            const info = CATEGORY_INFO[categoryName] || { icon: "🔍", desc: `Commands in the ${categoryName} category` };
+            return {
+                label: `${info.icon} ${categoryName}`,
+                description: `View ${categoryName.toLowerCase()} commands`,
+                value: category,
+            };
+        }),
     ];
 
     const botName = client?.user?.username || "Bot";
-    const embed = createEmbed({ 
+    const embed = createEmbed({
         title: `🤖 ${botName} Help Center`,
-        description: "Your all-in-one Discord companion for moderation, economy, fun, and server management.",
-        color: 'primary'
+        description: "Showing commands available based on your permissions. Select a category to explore.",
+        color: 'primary',
     });
 
-    embed.addFields(
-        {
-            name: "🛡️ **Moderation**",
-            value: "Server moderation, user management, and enforcement tools",
-            inline: true
-        },
-        {
-            name: "🎮 **Fun**",
-            value: "Games, entertainment, and interactive commands",
-            inline: true
-        },
-        {
-            name: "📊 **Leveling**",
-            value: "User levels, XP system, and progression tracking",
-            inline: true
-        },
-        {
-            name: "🎫 **Tickets**",
-            value: "Support ticket system for server management",
-            inline: true
-        },
-        {
-            name: "🎉 **Giveaways**",
-            value: "Automated giveaway management and distribution",
-            inline: true
-        },
-        {
-            name: "👋 **Welcome**",
-            value: "Member welcome messages and onboarding",
-            inline: true
-        },
-        {
-            name: "👥 **Community**",
-            value: "Community tools, applications, and member engagement",
-            inline: true
-        },
-        {
-            name: "🎙️ **Join to Create**",
-            value: "Dynamic voice channel creation and management",
-            inline: true
-        },
-        {
-            name: "🎭 **Reaction Roles**",
-            value: "Self-assignable roles using reaction-role systems",
-            inline: true
-        },
-        {
-            name: "✅ **Verification**",
-            value: "Member verification workflows and access gating",
-            inline: true
-        },
-        {
-            name: "🔧 **Utilities**",
-            value: "Useful tools and server utilities",
-            inline: true
-        },
-        {
-            name: "🛠️ **Tools**",
-            value: "Embed builder, polls, and other creation tools",
-            inline: true
-        },
-        {
-            name: "🔍 **Search**",
-            value: "Search YouTube, Wikipedia, GitHub, and more",
-            inline: true
-        }
-    );
-
-    embed.setFooter({ 
-        text: "Made with ❤️" 
+    // Dynamically add fields only for categories this member can access
+    const fields = filteredCategories.map((category) => {
+        const categoryName =
+            category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+        const info = CATEGORY_INFO[categoryName] || { icon: "🔍", desc: `Commands in the ${categoryName} category` };
+        return {
+            name: `${info.icon} **${categoryName}**`,
+            value: info.desc,
+            inline: true,
+        };
     });
+
+    if (fields.length > 0) {
+        embed.addFields(fields);
+    }
+
+    embed.setFooter({ text: "Made with ❤️" });
     embed.setTimestamp();
 
     const supportButton = new ButtonBuilder()
@@ -160,9 +112,7 @@ export async function createInitialHelpMenu(client) {
         options,
     );
 
-    const buttonRow = new ActionRowBuilder().addComponents([
-        supportButton,
-    ]);
+    const buttonRow = new ActionRowBuilder().addComponents([supportButton]);
 
     return {
         embeds: [embed],
@@ -173,14 +123,12 @@ export async function createInitialHelpMenu(client) {
 export default {
     data: new SlashCommandBuilder()
         .setName("help")
-        .setDescription("Displays the help menu with all available commands"),
+        .setDescription("Displays commands available to you based on your permissions"),
 
     async execute(interaction, guildConfig, client) {
-        
-        const { MessageFlags } = await import('discord.js');
         await InteractionHelper.safeDefer(interaction);
-        
-        const { embeds, components } = await createInitialHelpMenu(client);
+
+        const { embeds, components } = await createInitialHelpMenu(client, interaction.member);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds,
@@ -199,11 +147,7 @@ export default {
                     embeds: [closedEmbed],
                     components: [],
                 });
-            } catch (error) {
-                
-            }
+            } catch (_) {}
         }, HELP_MENU_TIMEOUT_MS);
     },
 };
-
-

@@ -3,7 +3,7 @@ import { createButton, getPaginationRow } from '../utils/components.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Collection, ActionRowBuilder, MessageFlags } from 'discord.js';
+import { Collection, ActionRowBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,11 +30,49 @@ const CATEGORY_ICONS = {
     Counter: "🔢",
     Tools: "🛠️",
     Search: "🔍",
-    Reaction_Roles: "🎭",
+    Reaction_roles: "🎭",
     Community: "👥",
     Birthday: "🎂",
     Config: "⚙️",
+    Jointocreate: "🎙️",
+    Serverstats: "📈",
+    Logging: "📋",
+    Voice: "🔊",
+    Verification: "✅",
 };
+
+// Returns true if the member has permission to use the command
+export function canMemberUseCommand(member, commandData) {
+    if (!member) return true;
+    if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
+
+    const defaultPerms = commandData?.default_member_permissions;
+    if (defaultPerms == null) return true;
+
+    try {
+        const required = BigInt(defaultPerms);
+        if (required === 0n) return false;
+        return member.permissions.has(required);
+    } catch {
+        return true;
+    }
+}
+
+// Returns a Set of category directory names the member has at least one accessible command in
+export function getAccessibleCategories(client, member) {
+    if (!member) return null;
+    const accessible = new Set();
+    for (const command of client.commands.values()) {
+        if (!command.category) continue;
+        const cmdData = typeof command.data?.toJSON === 'function'
+            ? command.data.toJSON()
+            : command.data;
+        if (canMemberUseCommand(member, cmdData)) {
+            accessible.add(command.category);
+        }
+    }
+    return accessible;
+}
 
 function buildHelpEntries(command, category) {
     const commandData = normalizeCommandData(command);
@@ -109,7 +147,7 @@ function normalizeCommandData(command) {
     };
 }
 
-async function createCategoryCommandsMenu(category, client) {
+async function createCategoryCommandsMenu(category, client, member) {
     const categoryName =
         category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
     const icon = CATEGORY_ICONS[categoryName] || "🔍";
@@ -134,6 +172,9 @@ async function createCategoryCommandsMenu(category, client) {
                     commandData.name === "commandlist"
                 )
                     continue;
+
+                // Only show commands the member can use
+                if (!canMemberUseCommand(member, commandData)) continue;
 
                 categoryCommands.push(...buildHelpEntries(command, categoryName));
             }
@@ -162,8 +203,8 @@ async function createCategoryCommandsMenu(category, client) {
     const embed = createEmbed({
         title: `${icon} ${categoryName} Commands`,
         description: categoryCommands.length > 0
-            ? `Click any command mention below to use it:`
-            : `No commands found in the **${categoryName}** category.`
+            ? `Commands available to you:`
+            : `You don't have permission to use any commands in the **${categoryName}** category.`
     });
 
     if (categoryCommands.length > 0) {
@@ -228,7 +269,7 @@ async function createCategoryCommandsMenu(category, client) {
     };
 }
 
-export async function createAllCommandsMenu(page = 1, client) {
+export async function createAllCommandsMenu(page = 1, client, member) {
     const commandsPerPage = 45;
     const allCommands = [];
 
@@ -263,6 +304,9 @@ export async function createAllCommandsMenu(page = 1, client) {
                         commandData.name === "commandlist"
                     )
                         continue;
+
+                    // Only show commands the member can use
+                    if (!canMemberUseCommand(member, commandData)) continue;
 
                     const categoryName =
                         category.charAt(0).toUpperCase() +
@@ -300,7 +344,7 @@ export async function createAllCommandsMenu(page = 1, client) {
 
     const embed = createEmbed({
         title: "📋 All Commands",
-        description: `(${allCommands.length} total commands, including subcommands)`
+        description: `${allCommands.length} commands available to you`
     });
 
     embed.setFooter({ text: FOOTER_TEXT });
@@ -371,16 +415,17 @@ export const helpCategorySelectMenu = {
                 await interaction.deferUpdate();
             }
 
+            const member = interaction.member;
             const selectedCategory = interaction.values[0];
 
             if (selectedCategory === ALL_COMMANDS_ID) {
-                const { embeds, components } = await createAllCommandsMenu(1, client);
+                const { embeds, components } = await createAllCommandsMenu(1, client, member);
                 await interaction.editReply({
                     embeds,
                     components,
                 });
             } else {
-                const { embeds, components } = await createCategoryCommandsMenu(selectedCategory, client);
+                const { embeds, components } = await createCategoryCommandsMenu(selectedCategory, client, member);
                 await interaction.editReply({
                     embeds,
                     components,
@@ -407,7 +452,3 @@ export const helpCategorySelectMenu = {
         }
     },
 };
-
-
-
-
