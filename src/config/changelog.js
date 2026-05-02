@@ -3,14 +3,7 @@ export const changelog = [
         version: '2.4.2',
         date: '2026-05-02',
         entries: [
-            { type: 'new', text: 'Added `/transferownership` — transfer server ownership to another member with a confirmation prompt (server owner only)' },
-        ],
-    },
-    {
-        version: '2.4.1',
-        date: '2026-05-02',
-        entries: [
-            { type: 'new', text: 'Added `/deleteserver` — permanently delete the server with a confirmation prompt (server owner only)' },
+            { type: 'removed', text: 'Removed `/deleteserver` and `/transferownership` — Discord does not allow bots to perform these actions unless the bot itself owns the server' },
         ],
     },
     {
