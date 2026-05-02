@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-import { TempRoleService } from '../../services/tempRoleService.js';
+import { TempRoleService, scheduleTempRoleRemoval } from '../../services/tempRoleService.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -77,9 +77,10 @@ export default {
                 await target.roles.add(role, `Temp role assigned by ${interaction.user.tag}`);
 
                 const expiresAt = Date.now() + durationMs;
-                await TempRoleService.add(client, guildId, {
+                const { entry } = await TempRoleService.add(client, guildId, {
                     userId: target.id, roleId: role.id, expiresAt, assignedBy: interaction.user.id,
                 });
+                scheduleTempRoleRemoval(client, guildId, entry);
 
                 return InteractionHelper.safeEditReply(interaction, {
                     embeds: [successEmbed(
