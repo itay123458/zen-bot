@@ -42,13 +42,6 @@ export default {
             });
         }
 
-        if (target.user.bot) {
-            return interaction.reply({
-                embeds: [errorEmbed('Invalid', 'You cannot transfer ownership to a bot.')],
-                flags: MessageFlags.Ephemeral,
-            });
-        }
-
         const confirmId = `transferowner-confirm-${interaction.id}`;
         const cancelId = `transferowner-cancel-${interaction.id}`;
 
