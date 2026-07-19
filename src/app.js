@@ -2,10 +2,10 @@
 import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import express from 'express';
-import cron from 'node-cron';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { BOT_OWNER_USER_ID } from './config/owner.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Dashboard auth helpers ────────────────────────────────────────
@@ -37,14 +37,8 @@ function verifyToken(token) {
 import config from './config/application.js';
 import { initializeDatabase } from './utils/database.js';
 import { getGuildConfig } from './services/guildConfig.js';
-import { getServerCounters, saveServerCounters, updateCounter } from './services/serverstatsService.js';
 import { logger, startupLog, shutdownLog } from './utils/logger.js';
-import { checkBirthdays } from './services/birthdayService.js';
-import { checkGiveaways } from './services/giveawayService.js';
-import { checkTempRoles } from './services/tempRoleService.js';
-import { checkAndUpdateGorillaStatus, checkAndPostPatchNotes } from './services/gorillaService.js';
 import { loadCommands, registerCommands as registerSlashCommands } from './handlers/commandLoader.js';
-import { LavalinkManager } from 'lavalink-client';
 
 class TitanBot extends Client {
   constructor() {
@@ -56,17 +50,15 @@ class TitanBot extends Client {
         
         
         GatewayIntentBits.GuildMessages,                
-        GatewayIntentBits.GuildMessageReactions,        
         GatewayIntentBits.MessageContent,               
+        GatewayIntentBits.DirectMessages,
         
         GatewayIntentBits.GuildVoiceStates,             
         
         
         GatewayIntentBits.GuildBans,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.GuildPresences,
       ],
-      partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+      partials: [Partials.Message, Partials.Channel, Partials.GuildMember, Partials.User],
     });
 
     this.config = config;
@@ -77,13 +69,6 @@ class TitanBot extends Client {
     this.modals = new Collection();
     this.cooldowns = new Collection();
     this.db = null;
-    this.lavalink = null;
-    this.musicPanels = new Map();       // guildId -> { messageId, textChannelId, requesterId, isPaused, activeFilter, progressInterval, emptyVCTimeout }
-    this.musicVotes = new Map();        // guildId -> Set<userId>
-    this.musicSearchResults = new Map(); // guildId:userId -> Track[]
-    this.musicLastTrack = new Map();    // guildId -> Track (last successfully started track, for retry button)
-    this.musicRetrying = new Set();     // guildId — guilds currently in auto-retry (prevents infinite retry loops)
-    this.musicTrackOverride = new Map(); // guildId -> {title,author,artworkUrl,duration} — metadata for yt-dlp fallback tracks
     this.rest = new REST({ version: '10' }).setToken(config.bot.token);
   }
 
@@ -114,27 +99,6 @@ class TitanBot extends Client {
       
       startupLog('Starting web server...');
       this.startWebServer();
-
-      startupLog('Initializing Lavalink manager...');
-      this.lavalink = new LavalinkManager({
-        nodes: [{
-          authorization: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
-          host: process.env.LAVALINK_HOST || 'lavalink',
-          port: Number(process.env.LAVALINK_PORT || 2333),
-          id: 'main',
-          requestTimeout: 10000,
-        }],
-        sendToShard: (guildId, payload) => {
-          this.guilds.cache.get(guildId)?.shard?.send(payload);
-        },
-        client: { id: process.env.CLIENT_ID, username: 'TitanBot' },
-        autoSkip: false,
-        playerOptions: {
-          defaultSearchPlatform: 'ytsearch',
-          volumeDecrementer: 0.75,
-        },
-      });
-      this.on('raw', d => this.lavalink.sendRawData(d));
 
       startupLog('Loading commands...');
       await loadCommands(this);
@@ -219,7 +183,7 @@ class TitanBot extends Client {
     app.use(express.json());
 
     // ── Page routes ───────────────────────────────────────────────
-    app.get('/',          (req, res) => res.redirect('/dashboard'));
+    app.get('/',          (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
     app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '../public/dashboard.html')));
     app.get('/login',     (req, res) => res.sendFile(path.join(__dirname, '../public/login.html')));
 
@@ -228,6 +192,27 @@ class TitanBot extends Client {
       res.json({
         username: this.user?.username || 'Bot',
         avatar:   this.user?.displayAvatarURL({ size: 128 }) || '',
+      });
+    });
+
+    app.get('/api/public-stats', (req, res) => {
+      const guild = this.guilds.cache.get(process.env.LANDING_GUILD_ID || '1526671786387705907');
+      const channels = guild?.channels.cache.filter(channel => !channel.isThread()).size || 0;
+      const resourceChannels = guild?.channels.cache.filter(channel => /resource|asset|preset|משאב|פריסט/i.test(channel.name)).size || 0;
+      res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60').json({
+        bot: {
+          online: this.isReady(),
+          avatar: this.user?.displayAvatarURL({ extension: 'webp', size: 256 }) || '',
+          commands: this.commands.size,
+          latency: Math.max(0, Math.round(this.ws.ping || 0)),
+          servers: this.guilds.cache.size
+        },
+        community: {
+          members: guild?.memberCount || 0,
+          channels,
+          resources: resourceChannels,
+          competitions: 0
+        }
       });
     });
 
@@ -281,8 +266,7 @@ class TitanBot extends Client {
         if (!userRes.ok) return res.redirect('/login?error=user_failed');
         const user = await userRes.json();
 
-        const ownerIds = process.env.OWNER_IDS?.split(',').map(id => id.trim()) ?? [];
-        const isOwner  = ownerIds.includes(user.id);
+        const isOwner = user.id === BOT_OWNER_USER_ID;
         const remember = req.query.state === '1';
         const token    = createToken({ userId: user.id, username: user.username, isOwner }, remember);
 
@@ -305,9 +289,7 @@ class TitanBot extends Client {
       if (!email || !password || email !== cfgEmail || password !== cfgPass) {
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
-      const ownerIds = process.env.OWNER_IDS?.split(',').map(id => id.trim()) ?? [];
-      const isOwner  = ownerIds.includes(process.env.DASHBOARD_OWNER_ID || '') || true;
-      const token    = createToken({ userId: email, username: email.split('@')[0], isOwner }, !!remember);
+      const token = createToken({ userId: email, username: email.split('@')[0], isOwner: false }, !!remember);
       res.json({ token });
     });
 
@@ -456,48 +438,7 @@ class TitanBot extends Client {
   }
 
   setupCronJobs() {
-    cron.schedule('0 6 * * *', () => checkBirthdays(this));
-    cron.schedule('* * * * *', () => checkGiveaways(this));
-    cron.schedule('* * * * *', () => checkTempRoles(this));
-    cron.schedule('*/15 * * * *', () => this.updateAllCounters());
-    cron.schedule('*/5 * * * *', () => checkAndUpdateGorillaStatus(this));
-    cron.schedule('0 9 * * *', () => checkAndPostPatchNotes(this));
-  }
-
-  async updateAllCounters() {
-    if (!this.db) {
-      logger.warn('Database not available for counter updates');
-      return;
-    }
-    
-    for (const [guildId, guild] of this.guilds.cache) {
-      try {
-        const counters = await getServerCounters(this, guildId);
-        const validCounters = [];
-        const orphanedCounters = [];
-        
-        for (const counter of counters) {
-          if (counter && counter.type && counter.channelId && counter.enabled !== false) {
-            const channel = guild.channels.cache.get(counter.channelId);
-            if (channel) {
-              validCounters.push(counter);
-              await updateCounter(this, guild, counter);
-            } else {
-              orphanedCounters.push(counter);
-              logger.info(`Removing orphaned counter ${counter.id} (type: ${counter.type}, deleted channel: ${counter.channelId}) from guild ${guildId}`);
-            }
-          }
-        }
-        
-        // Save cleaned counters if any were orphaned
-        if (orphanedCounters.length > 0) {
-          await saveServerCounters(this, guildId, validCounters);
-          logger.info(`Cleaned up ${orphanedCounters.length} orphaned counter(s) from guild ${guildId} during scheduled update`);
-        }
-      } catch (error) {
-        logger.error(`Error updating counters for guild ${guildId}:`, error);
-      }
-    }
+    // Reserved for future scheduled tasks. This release has no background jobs.
   }
 
   async loadHandlers() {
@@ -557,9 +498,6 @@ class TitanBot extends Client {
 
     try {
       
-      logger.info('Stopping cron jobs...');
-      cron.getTasks().forEach(task => task.stop());
-      logger.info('✅ Cron jobs stopped');
 
       // Close database connection
       if (this.db && this.db.db) {
@@ -623,6 +561,3 @@ try {
 }
 
 export default TitanBot;
-
-
-

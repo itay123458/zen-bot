@@ -51,7 +51,7 @@ async function getAllFiles(directory, fileList = []) {
                 continue;
             }
             await getAllFiles(filePath, fileList);
-        } else if (file.name.endsWith('.js')) {
+        } else if (file.name.endsWith('.js') && file.name !== 'factory.js') {
             fileList.push(filePath);
         }
     }
@@ -66,6 +66,7 @@ async function getAllFiles(directory, fileList = []) {
 
 export async function loadCommands(client) {
     client.commands = new Collection();
+    client.failedCommands = new Collection();
     const commandsPath = path.join(__dirname, '../commands');
     const commandFiles = await getAllFiles(commandsPath);
     
@@ -94,11 +95,11 @@ export async function loadCommands(client) {
             
             const primaryCommandName = command.data.name;
             
-            if (!uniqueCommandNames.has(primaryCommandName)) {
-                uniqueCommandNames.add(primaryCommandName);
-                
-                client.commands.set(primaryCommandName, command);
+            if (uniqueCommandNames.has(primaryCommandName)) {
+                throw new Error(`Duplicate command name "${primaryCommandName}" in ${normalizedPath}`);
             }
+            uniqueCommandNames.add(primaryCommandName);
+            client.commands.set(primaryCommandName, command);
             
             const subcommands = getSubcommandInfo(command.data.toJSON());
             
@@ -109,6 +110,7 @@ export async function loadCommands(client) {
             }
             
         } catch (error) {
+            client.failedCommands.set(filePath, error.message);
             logger.error(`Error loading command from ${filePath}:`, error);
         }
     }
@@ -321,7 +323,8 @@ export async function reloadCommand(client, commandName) {
         moduleUrl.searchParams.set('t', Date.now().toString());
 
         const newCommand = (await import(moduleUrl.href)).default;
-        
+        newCommand.category = command.category;
+        newCommand.filePath = command.filePath;
         client.commands.set(commandName, newCommand);
         
         logger.info(`Reloaded command: ${commandName}`);
@@ -331,5 +334,3 @@ export async function reloadCommand(client, commandName) {
         return { success: false, message: `Error reloading command: ${error.message}` };
     }
 }
-
-
