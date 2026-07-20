@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import sayCommand from '../src/commands/owner/say.js';
+import sayCommand, { downloadSayAttachment } from '../src/commands/owner/say.js';
 import { OWNER_INBOX_USER_ID } from '../src/services/ownerInboxService.js';
 
 test('/say is guild-only and accepts optional text plus an optional video', () => {
@@ -80,6 +80,31 @@ test('/say can upload a video as the bot without requiring text', async () => {
   assert.equal(sent.files[0].name, 'edit.mp4');
   assert.equal(sent.files[0].description, 'EditIL video');
   assert.deepEqual(sent.allowedMentions, { parse: [], users: [], roles: [] });
+});
+
+test('/say compresses videos above the safe upload limit', async () => {
+  let compressorCalled = false;
+  const source = new Uint8Array(9_500_001);
+  const file = await downloadSayAttachment({
+    url: 'video-source',
+    name: 'large.mov',
+    contentType: 'video/quicktime',
+  }, {
+    fetchImpl: async () => ({
+      ok: true,
+      arrayBuffer: async () => source.buffer,
+    }),
+    compressor: async buffer => {
+      compressorCalled = true;
+      assert.equal(buffer.length, source.length);
+      return Buffer.from([4, 5, 6]);
+    },
+  });
+
+  assert.equal(compressorCalled, true);
+  assert.equal(file.compressed, true);
+  assert.equal(file.name, 'large-compressed.mp4');
+  assert.deepEqual([...file.attachment], [4, 5, 6]);
 });
 
 test('/say rejects an empty request', async () => {

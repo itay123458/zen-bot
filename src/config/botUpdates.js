@@ -1,11 +1,13 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '4.4.8',
+  version: '4.4.9',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
-  newFeatures: [],
+  newFeatures: [
+    'הפקודה `/say` דוחסת כעת סרטונים גדולים אוטומטית ל־MP4 שמתאים למגבלת ההעלאה של השרת',
+  ],
   fixes: [
-    'זמן ההעלאה של סרטונים ב־`/say` הוגדל משניות בודדות לשתי דקות כדי למנוע ביטול של העלאות תקינות',
+    'נוספו מגבלות בטוחות והודעות ברורות כאשר קובץ המקור גדול מדי או אינו ניתן לדחיסה',
   ],
   improvements: [],
   changelogUrl: null,
