@@ -2,6 +2,29 @@ import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { OWNER_INBOX_USER_ID } from '../../services/ownerInboxService.js';
 import logger from '../../utils/logger.js';
 
+export async function downloadSayAttachment(attachment) {
+  const response = await fetch(attachment.url);
+  if (!response.ok) throw new Error(`ATTACHMENT_DOWNLOAD_FAILED:${response.status}`);
+  return {
+    attachment: Buffer.from(await response.arrayBuffer()),
+    name: attachment.name || 'video.mp4',
+    description: attachment.description || undefined,
+  };
+}
+
+function sayFailureMessage(error) {
+  if (error?.code === 40005 || error?.status === 413) {
+    return 'הקובץ גדול ממגבלת ההעלאה של הבוט בשרת. נסו להקטין או לדחוס את הסרטון.';
+  }
+  if (error?.code === 50013) {
+    return 'לבוט חסרה הרשאת „צירוף קבצים” בערוץ הזה.';
+  }
+  if (String(error?.message).startsWith('ATTACHMENT_DOWNLOAD_FAILED:')) {
+    return 'לא ניתן היה להוריד את הסרטון מ־Discord. נסו להעלות אותו מחדש.';
+  }
+  return 'לא ניתן היה לשלוח את ההודעה. נסו שוב או בדקו את הרשאות הבוט בערוץ.';
+}
+
 export default {
   data: new SlashCommandBuilder()
     .setName('say')
@@ -43,13 +66,10 @@ export default {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
+      const file = video ? await downloadSayAttachment(video) : null;
       const message = await interaction.channel.send({
         content: content || undefined,
-        files: video ? [{
-          attachment: video.url,
-          name: video.name || 'video.mp4',
-          description: video.description || undefined,
-        }] : [],
+        files: file ? [file] : [],
         allowedMentions: { parse: [], users: [], roles: [] },
       });
       logger.info('Owner sent a message as the bot', {
@@ -67,7 +87,7 @@ export default {
         userId: interaction.user.id,
         error: error.stack || error.message,
       });
-      return interaction.editReply('לא ניתן היה לשלוח את ההודעה. בדקו את הרשאות הבוט בערוץ.');
+      return interaction.editReply(sayFailureMessage(error));
     }
   },
 };

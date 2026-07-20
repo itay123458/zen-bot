@@ -63,7 +63,7 @@ test('/say can upload a video as the bot without requiring text', async () => {
       getString: () => null,
       getAttachment: () => ({
         id: 'attachment-1',
-        url: 'https://cdn.discordapp.com/attachments/video.mp4',
+        url: 'data:video/mp4;base64,AAECAw==',
         name: 'edit.mp4',
         description: 'EditIL video',
       }),
@@ -75,11 +75,10 @@ test('/say can upload a video as the bot without requiring text', async () => {
   await sayCommand.execute(interaction);
 
   assert.equal(sent.content, undefined);
-  assert.deepEqual(sent.files, [{
-    attachment: 'https://cdn.discordapp.com/attachments/video.mp4',
-    name: 'edit.mp4',
-    description: 'EditIL video',
-  }]);
+  assert.equal(Buffer.isBuffer(sent.files[0].attachment), true);
+  assert.deepEqual([...sent.files[0].attachment], [0, 1, 2, 3]);
+  assert.equal(sent.files[0].name, 'edit.mp4');
+  assert.equal(sent.files[0].description, 'EditIL video');
   assert.deepEqual(sent.allowedMentions, { parse: [], users: [], roles: [] });
 });
 
