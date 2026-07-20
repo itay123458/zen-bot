@@ -13,6 +13,9 @@ export async function downloadSayAttachment(attachment) {
 }
 
 function sayFailureMessage(error) {
+  if (error?.name === 'AbortError') {
+    return 'העלאת הסרטון ארכה יותר מדי זמן. נסו קובץ קטן יותר או חיבור מהיר יותר.';
+  }
   if (error?.code === 40005 || error?.status === 413) {
     return 'הקובץ גדול ממגבלת ההעלאה של הבוט בשרת. נסו להקטין או לדחוס את הסרטון.';
   }

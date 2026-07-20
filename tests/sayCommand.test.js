@@ -98,6 +98,29 @@ test('/say rejects an empty request', async () => {
   assert.match(reply.content, /טקסט, סרטון/);
 });
 
+test('/say explains a Discord upload timeout in Hebrew', async () => {
+  let reply;
+  const timeout = new Error('This operation was aborted');
+  timeout.name = 'AbortError';
+  await sayCommand.execute({
+    user: { id: OWNER_INBOX_USER_ID },
+    guildId: 'guild-1',
+    channelId: 'channel-1',
+    channel: {
+      isTextBased: () => true,
+      send: async () => { throw timeout; },
+    },
+    options: {
+      getString: () => 'hello',
+      getAttachment: () => null,
+    },
+    deferReply: async () => {},
+    editReply: async payload => { reply = payload; },
+  });
+
+  assert.match(reply, /ארכה יותר מדי זמן/);
+});
+
 test('/say rejects users other than the configured owner', async () => {
   let sent = false;
   let reply;
