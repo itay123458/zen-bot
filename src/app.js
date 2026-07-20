@@ -5,6 +5,7 @@ import express from 'express';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { BOT_OWNER_USER_ID } from './config/owner.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Dashboard auth helpers ────────────────────────────────────────
@@ -49,17 +50,15 @@ class TitanBot extends Client {
         
         
         GatewayIntentBits.GuildMessages,                
-        GatewayIntentBits.GuildMessageReactions,        
         GatewayIntentBits.MessageContent,               
+        GatewayIntentBits.DirectMessages,
         
         GatewayIntentBits.GuildVoiceStates,             
         
         
         GatewayIntentBits.GuildBans,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.GuildPresences,
       ],
-      partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+      partials: [Partials.Message, Partials.Channel, Partials.GuildMember, Partials.User],
     });
 
     this.config = config;
@@ -184,7 +183,7 @@ class TitanBot extends Client {
     app.use(express.json());
 
     // ── Page routes ───────────────────────────────────────────────
-    app.get('/',          (req, res) => res.redirect('/dashboard'));
+    app.get('/',          (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
     app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '../public/dashboard.html')));
     app.get('/login',     (req, res) => res.sendFile(path.join(__dirname, '../public/login.html')));
 
@@ -193,6 +192,27 @@ class TitanBot extends Client {
       res.json({
         username: this.user?.username || 'Bot',
         avatar:   this.user?.displayAvatarURL({ size: 128 }) || '',
+      });
+    });
+
+    app.get('/api/public-stats', (req, res) => {
+      const guild = this.guilds.cache.get(process.env.LANDING_GUILD_ID || '1526671786387705907');
+      const channels = guild?.channels.cache.filter(channel => !channel.isThread()).size || 0;
+      const resourceChannels = guild?.channels.cache.filter(channel => /resource|asset|preset|משאב|פריסט/i.test(channel.name)).size || 0;
+      res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60').json({
+        bot: {
+          online: this.isReady(),
+          avatar: this.user?.displayAvatarURL({ extension: 'webp', size: 256 }) || '',
+          commands: this.commands.size,
+          latency: Math.max(0, Math.round(this.ws.ping || 0)),
+          servers: this.guilds.cache.size
+        },
+        community: {
+          members: guild?.memberCount || 0,
+          channels,
+          resources: resourceChannels,
+          competitions: 0
+        }
       });
     });
 
@@ -246,8 +266,7 @@ class TitanBot extends Client {
         if (!userRes.ok) return res.redirect('/login?error=user_failed');
         const user = await userRes.json();
 
-        const ownerIds = process.env.OWNER_IDS?.split(',').map(id => id.trim()) ?? [];
-        const isOwner  = ownerIds.includes(user.id);
+        const isOwner = user.id === BOT_OWNER_USER_ID;
         const remember = req.query.state === '1';
         const token    = createToken({ userId: user.id, username: user.username, isOwner }, remember);
 
@@ -270,9 +289,7 @@ class TitanBot extends Client {
       if (!email || !password || email !== cfgEmail || password !== cfgPass) {
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
-      const ownerIds = process.env.OWNER_IDS?.split(',').map(id => id.trim()) ?? [];
-      const isOwner  = ownerIds.includes(process.env.DASHBOARD_OWNER_ID || '') || true;
-      const token    = createToken({ userId: email, username: email.split('@')[0], isOwner }, !!remember);
+      const token = createToken({ userId: email, username: email.split('@')[0], isOwner: false }, !!remember);
       res.json({ token });
     });
 
@@ -544,5 +561,3 @@ try {
 }
 
 export default TitanBot;
-
-

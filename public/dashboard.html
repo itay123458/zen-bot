@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Itay100K Bot Dashboard</title>
+  <link rel="stylesheet" href="/accessibility.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,7 +24,7 @@
       --gold:#f5a623;
       --text:#f0f0f5;
       --sub:#9094a8;
-      --muted:#555b6e;
+      --muted:#9297aa;
     }
     body {
       font-family:'Inter',sans-serif;
@@ -301,9 +302,20 @@
     .hidden { display:none !important; }
     .footer { position:relative; z-index:10; text-align:center; padding:24px; color:var(--muted); font-size:11px; }
     .footer span { opacity:.5; }
+    .footer a { color:var(--text); }
+    @media(max-width:600px) {
+      .hdr { padding-inline:12px; flex-wrap:wrap; }
+      .hdr-right { width:100%; margin-left:0; flex-wrap:wrap; }
+      .tabs { top:112px; padding-inline:8px; overflow-x:auto; }
+      .tab { flex:0 0 auto; }
+      .page { padding-inline:12px; }
+      .pcmd { flex-wrap:wrap; }
+      .pcmd-name { min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+    }
   </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
 <div class="bg">
   <div class="blob blob1"></div>
@@ -320,7 +332,7 @@
   </div>
   <div>
     <div class="hdr-name" id="botName">Loading…</div>
-    <div class="hdr-status"><div class="dot"></div><span>Online</span></div>
+    <div class="hdr-status"><div class="dot" aria-hidden="true"></div><span role="status">Online</span></div>
   </div>
   <div class="hdr-right">
     <span class="owner-badge hidden" id="ownerBadge">👑 Owner</span>
@@ -335,30 +347,30 @@
 </header>
 
 <!-- Tab navigation -->
-<nav class="tabs">
-  <button class="tab active" data-tab="overview">
+<nav class="tabs" role="tablist" aria-label="Dashboard sections">
+  <button class="tab active" id="dashboard-tab-overview" role="tab" aria-selected="true" aria-controls="tab-overview" tabindex="0" data-tab="overview">
     <span class="tab-icon">🏠</span> Overview
   </button>
-  <button class="tab" data-tab="commands">
+  <button class="tab" id="dashboard-tab-commands" role="tab" aria-selected="false" aria-controls="tab-commands" tabindex="-1" data-tab="commands">
     <span class="tab-icon">⚡</span> Commands
     <span class="tab-count" id="tabCmdCount">—</span>
   </button>
-  <button class="tab" data-tab="servers">
+  <button class="tab" id="dashboard-tab-servers" role="tab" aria-selected="false" aria-controls="tab-servers" tabindex="-1" data-tab="servers">
     <span class="tab-icon">🖥️</span> Servers
     <span class="tab-count" id="tabSrvCount">—</span>
   </button>
-  <button class="tab" data-tab="prefix">
+  <button class="tab" id="dashboard-tab-prefix" role="tab" aria-selected="false" aria-controls="tab-prefix" tabindex="-1" data-tab="prefix">
     <span class="tab-icon">⌨️</span> Prefix Commands
   </button>
-  <button class="tab hidden" id="ownerTab" data-tab="owner">
+  <button class="tab hidden" id="ownerTab" role="tab" aria-selected="false" aria-controls="tab-owner" tabindex="-1" data-tab="owner" hidden>
     <span class="tab-icon">👑</span> Owner Panel
   </button>
 </nav>
 
-<main class="page">
+<main class="page" id="main-content" tabindex="-1">
 
   <!-- Overview tab -->
-  <div class="section active" id="tab-overview">
+  <div class="section active" id="tab-overview" role="tabpanel" aria-labelledby="dashboard-tab-overview">
     <div class="stats">
       <div class="sc"><div class="si b">🖥️</div><div><div class="sv" id="sServers">—</div><div class="sl">Servers</div></div></div>
       <div class="sc"><div class="si g">👥</div><div><div class="sv" id="sUsers">—</div><div class="sl">Total Users</div></div></div>
@@ -379,7 +391,7 @@
   </div>
 
   <!-- Commands tab -->
-  <div class="section" id="tab-commands">
+  <div class="section" id="tab-commands" role="tabpanel" aria-labelledby="dashboard-tab-commands" hidden>
     <div class="card">
       <div class="c-head"><div class="c-title">⚡ All Commands <span class="badge" id="cmdBadgeFull">—</span></div></div>
       <div class="c-body full" id="cmdBodyFull"><div class="spinner"></div></div>
@@ -387,7 +399,7 @@
   </div>
 
   <!-- Servers tab -->
-  <div class="section" id="tab-servers">
+  <div class="section" id="tab-servers" role="tabpanel" aria-labelledby="dashboard-tab-servers" hidden>
     <div class="card">
       <div class="c-head"><div class="c-title">🖥️ All Servers <span class="badge" id="srvBadgeFull">—</span></div></div>
       <div class="c-body full" id="srvBodyFull"><div class="spinner"></div></div>
@@ -395,7 +407,7 @@
   </div>
 
   <!-- Prefix tab -->
-  <div class="section" id="tab-prefix">
+  <div class="section" id="tab-prefix" role="tabpanel" aria-labelledby="dashboard-tab-prefix" hidden>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" id="prefixGrid">
 
       <!-- > Mod commands -->
@@ -418,7 +430,7 @@
   </div>
 
   <!-- Owner tab -->
-  <div class="section" id="tab-owner">
+  <div class="section" id="tab-owner" role="tabpanel" aria-labelledby="ownerTab" hidden>
     <div class="owner-panel">
       <div class="c-head">
         <div class="c-title">👑 Owner Panel <span class="badge" id="ownerBadgeCount"></span></div>
@@ -440,7 +452,7 @@
 
 </main>
 
-<div class="footer"><span>itay100k bot dashboard</span></div>
+<footer class="footer"><span>itay100k bot dashboard · <a href="/accessibility.html">Accessibility</a></span><span class="sr-only" id="dashboardStatus" role="status" aria-live="polite"></span></footer>
 
 <script>
 const OWNER_CMDS = [
@@ -562,12 +574,34 @@ function renderPrefixCmds(list, containerId) {
 
 // ── Tab navigation ────────────────────────────────────────────────
 const tabs = document.querySelectorAll('.tab');
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
+function selectDashboardTab(tab, moveFocus = false) {
+    tabs.forEach(t => {
+      const selected = t === tab;
+      t.classList.toggle('active', selected);
+      t.setAttribute('aria-selected', String(selected));
+      t.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelectorAll('.section[role="tabpanel"]').forEach(s => {
+      const selected = s.id === 'tab-' + tab.dataset.tab;
+      s.classList.toggle('active', selected);
+      s.hidden = !selected;
+    });
     tab.classList.add('active');
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (moveFocus) tab.focus();
+}
+tabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectDashboardTab(tab));
+  tab.addEventListener('keydown', event => {
+    const visibleTabs = [...tabs].filter(item => !item.hidden);
+    const current = visibleTabs.indexOf(tab);
+    let next = null;
+    if (event.key === 'ArrowRight') next = (current + 1) % visibleTabs.length;
+    if (event.key === 'ArrowLeft') next = (current - 1 + visibleTabs.length) % visibleTabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = visibleTabs.length - 1;
+    if (next === null) return;
+    event.preventDefault();
+    selectDashboardTab(visibleTabs[next], true);
   });
 });
 
@@ -594,6 +628,7 @@ api('/api/botinvite').then(d => {
 
 // Copy permanent server invite to clipboard
 async function copyInvite(btn, guildId) {
+  const status = document.getElementById('dashboardStatus');
   btn.textContent = '…';
   btn.disabled = true;
   try {
@@ -602,13 +637,16 @@ async function copyInvite(btn, guildId) {
       await navigator.clipboard.writeText(d.url);
       btn.textContent = '✓ Copied!';
       btn.classList.add('copied');
+      status.textContent = 'Server invite copied to the clipboard.';
       setTimeout(() => { btn.textContent = '🔗 Invite'; btn.classList.remove('copied'); btn.disabled = false; }, 2000);
     } else {
       btn.textContent = '✗ Failed';
+      status.textContent = 'Could not create a server invite.';
       setTimeout(() => { btn.textContent = '🔗 Invite'; btn.disabled = false; }, 2000);
     }
   } catch {
     btn.textContent = '✗ Error';
+    status.textContent = 'An error occurred while creating the server invite.';
     setTimeout(() => { btn.textContent = '🔗 Invite'; btn.disabled = false; }, 2000);
   }
 }
@@ -652,6 +690,7 @@ async function loadStats() {
   if (d.isOwner) {
     document.getElementById('ownerBadge').classList.remove('hidden');
     document.getElementById('ownerTab').classList.remove('hidden');
+    document.getElementById('ownerTab').hidden = false;
     document.getElementById('ownerBadgeCount').textContent = OWNER_CMDS.length + ' cmds';
     renderOwnerCmds();
     renderSysInfo(d);
@@ -667,6 +706,7 @@ async function loadCommands() {
   document.getElementById('tabCmdCount').textContent = total;
   document.getElementById('cmdBodyOv').innerHTML = html;
   document.getElementById('cmdBodyFull').innerHTML = html;
+  document.getElementById('dashboardStatus').textContent = `${total} commands loaded.`;
 }
 
 async function loadServers() {
@@ -677,6 +717,7 @@ async function loadServers() {
   document.getElementById('tabSrvCount').textContent = d.length;
   document.getElementById('srvBodyOv').innerHTML = html;
   document.getElementById('srvBodyFull').innerHTML = html;
+  document.getElementById('dashboardStatus').textContent = `${d.length} servers loaded.`;
 }
 
 function renderOwnerCmds() {
