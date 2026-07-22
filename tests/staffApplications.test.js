@@ -81,7 +81,10 @@ test('public command grid cannot create horizontal page overflow', async () => {
   assert.match(css, /\.public-command-grid \{[^}]*repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css, /\.public-command-grid article \{[^}]*min-width: 0/);
   assert.match(script, /containCommandLayout/);
-  assert.match(worker, /const siteResponse[\s\S]*?'cache-control': 'no-cache'/);
+  assert.match(worker, /const siteResponse[\s\S]*?s-maxage=300/);
+  assert.match(worker, /cachePublicResponse/);
+  assert.match(worker, /sitemap\.xml/);
+  assert.match(worker, /favicon\.ico/);
 });
 
 test('custom animated background stays lightweight and accessible', async () => {

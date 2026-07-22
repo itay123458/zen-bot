@@ -13,11 +13,11 @@ const MAX_STATUS_AGE_MS = 11 * 60_000;
 const STAFF_QUEUE_KEY = 'staffapp:queue';
 const STAFF_SETTINGS_KEY = 'staffapp:settings';
 
-const json = (body, status = 200) => new Response(JSON.stringify(body), {
+const json = (body, status = 200, cacheControl = 'no-store') => new Response(JSON.stringify(body), {
   status,
   headers: {
     'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store',
+    'cache-control': cacheControl,
     'x-content-type-options': 'nosniff'
   }
 });
@@ -33,10 +33,10 @@ const legalResponse = (body, contentType) => new Response(body, {
   }
 });
 
-const siteResponse = (body, contentType) => new Response(body, {
+const siteResponse = (body, contentType, cacheControl = 'public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=86400') => new Response(body, {
   headers: {
     'content-type': `${contentType}; charset=utf-8`,
-    'cache-control': 'no-cache',
+    'cache-control': cacheControl,
     'content-security-policy': "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://cdn.discordapp.com https://i.ytimg.com data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
     'referrer-policy': 'strict-origin-when-cross-origin',
     'permissions-policy': 'camera=(), microphone=(), geolocation=(), payment=()',
@@ -48,6 +48,12 @@ const siteResponse = (body, contentType) => new Response(body, {
 const secureAsset = async (request, env) => {
   const response = await env.ASSETS.fetch(request);
   const secured = new Response(response.body, response);
+  const pathname = new URL(request.url).pathname;
+  if (response.ok && /\.(?:css|js|svg|webp|png|jpg|jpeg|gif|woff2?)$/i.test(pathname)) {
+    secured.headers.set('cache-control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
+  } else if (response.ok && /\.html$/i.test(pathname)) {
+    secured.headers.set('cache-control', 'public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=86400');
+  }
   secured.headers.set('content-security-policy', "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://cdn.discordapp.com data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   secured.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
   secured.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(), payment=()');
@@ -56,12 +62,35 @@ const secureAsset = async (request, env) => {
   return secured;
 };
 
+const cachePublicResponse = (request, response, ctx) => {
+  if (response.ok) ctx?.waitUntil(caches.default.put(request, response.clone()));
+  return response;
+};
+
+const ROBOTS = `User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://editil.com/sitemap.xml
+`;
+
+const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://editil.com/</loc></url>
+  <url><loc>https://editil.com/privacy</loc></url>
+  <url><loc>https://editil.com/terms</loc></url>
+  <url><loc>https://editil.com/security</loc></url>
+  <url><loc>https://editil.com/accessibility</loc></url>
+</urlset>`;
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/' || url.pathname === '/index.html') return siteResponse(indexHtml, 'text/html');
-    if (url.pathname === '/landing.css') return siteResponse(landingCss, 'text/css');
-    if (url.pathname === '/animations.css') return siteResponse(animationsCss, 'text/css');
+    if (url.pathname === '/landing.css') return siteResponse(landingCss, 'text/css', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
+    if (url.pathname === '/animations.css') return siteResponse(animationsCss, 'text/css', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
+    if (url.pathname === '/favicon.ico') return Response.redirect(`${url.origin}/favicon.svg`, 308);
+    if (url.pathname === '/robots.txt') return siteResponse(ROBOTS, 'text/plain', 'public, max-age=3600, s-maxage=86400');
+    if (url.pathname === '/sitemap.xml') return siteResponse(SITEMAP, 'application/xml', 'public, max-age=3600, s-maxage=86400');
     if (['/legal/privacy-notice-v1', '/privacy-policy.html', '/privacy.html', '/privacy'].includes(url.pathname)) return legalResponse(privacyHtml, 'text/html');
     if (['/legal/terms-of-use-v1', '/terms-of-use.html', '/terms.html', '/terms'].includes(url.pathname)) return legalResponse(termsHtml, 'text/html');
     if (['/legal/security-v1', '/security.html', '/security'].includes(url.pathname)) return legalResponse(securityHtml, 'text/html');
@@ -70,12 +99,14 @@ export default {
     if (url.pathname === '/accessibility.css') return legalResponse(accessibilityCss, 'text/css');
 
     if (url.pathname === '/api/status' && request.method === 'GET') {
+      const cached = await caches.default.match(request);
+      if (cached) return cached;
       const saved = await env.STATUS_KV.get(STATUS_KEY, 'json');
       if (!saved) {
         const invite = await fetch('https://discord.com/api/v10/invites/6Hu8xpTYqQ?with_counts=true', {
           headers: { accept: 'application/json', 'user-agent': 'EditIL-Website/1.0' }
         }).then(response => response.ok ? response.json() : null).catch(() => null);
-        return json({
+        return cachePublicResponse(request, json({
           bot: { online: false },
           community: {
             members: Number(invite?.approximate_member_count) || 31,
@@ -84,10 +115,14 @@ export default {
             competitions: 0
           },
           fallback: true
-        });
+        }, 200, 'public, max-age=30, s-maxage=60, stale-while-revalidate=300'), ctx);
       }
       const online = Date.now() - new Date(saved.updatedAt).getTime() <= MAX_STATUS_AGE_MS;
-      return json({ ...saved, bot: { ...saved.bot, online } });
+      return cachePublicResponse(request, json(
+        { ...saved, bot: { ...saved.bot, online } },
+        200,
+        'public, max-age=30, s-maxage=60, stale-while-revalidate=300'
+      ), ctx);
     }
 
     if (url.pathname === '/api/heartbeat' && request.method === 'POST') {
@@ -141,8 +176,14 @@ export default {
     }
 
     if (url.pathname === '/api/staff-applications/availability' && request.method === 'GET') {
+      const cached = await caches.default.match(request);
+      if (cached) return cached;
       const settings = await env.STATUS_KV.get(STAFF_SETTINGS_KEY, 'json');
-      return json({ open: settings?.open === true, updatedAt: settings?.updatedAt || null });
+      return cachePublicResponse(request, json(
+        { open: settings?.open === true, updatedAt: settings?.updatedAt || null },
+        200,
+        'public, max-age=15, s-maxage=30, stale-while-revalidate=120'
+      ), ctx);
     }
 
     if (url.pathname === '/api/staff-applications/availability' && request.method === 'POST') {

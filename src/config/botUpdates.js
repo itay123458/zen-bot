@@ -1,15 +1,15 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '4.4.9',
+  version: '4.5.0',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
-  newFeatures: [
-    'הפקודה `/say` דוחסת כעת סרטונים גדולים אוטומטית ל־MP4 שמתאים למגבלת ההעלאה של השרת',
-  ],
+  newFeatures: [],
   fixes: [
-    'נוספו מגבלות בטוחות והודעות ברורות כאשר קובץ המקור גדול מדי או אינו ניתן לדחיסה',
+    'תוקנו נתיבי סמל האתר, מפת האתר ודף הנגישות כדי לצמצם שגיאות טעינה באתר',
   ],
-  improvements: [],
+  improvements: [
+    'נוסף מטמון יעיל לקבצים ולנתוני הסטטוס הציבוריים כדי לשפר את מהירות האתר ולהפחית עומס',
+  ],
   changelogUrl: null,
   imageUrl: null,
 });
