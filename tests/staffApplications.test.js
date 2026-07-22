@@ -71,8 +71,8 @@ test('public command grid cannot create horizontal page overflow', async () => {
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
-    assert.match(html, /animations\.css\?v=4\.3\.0/);
-    assert.match(html, /redesign\.css\?v=4\.3\.0/);
+    assert.match(html, /animations\.css\?v=4\.5\.0/);
+    assert.match(html, /redesign\.css\?v=4\.5\.0/);
     assert.match(html, /class="editor-stage/);
     assert.match(html, /class="creative-ticker"/);
   assert.match(css, /html, body \{[^}]*overflow-x: clip/);
