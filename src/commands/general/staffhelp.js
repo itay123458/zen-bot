@@ -19,13 +19,13 @@ export const STAFF_HELP_CATEGORIES = Object.freeze({
   moderation: {
     label: 'ניהול ואכיפה', emoji: '🛡️', level: AccessLevel.MODERATOR,
     commands: [
-      ['warnings', '/warn, /warnings, /clearwarnings', 'ניהול אזהרות של חברים'],
-      ['timeout', '/timeout <member> <duration>', 'הרחקה זמנית — פעולה רגישה'],
-      ['kick', '/kick <member> <reason>', 'הוצאת חבר — פעולה רגישה'],
-      ['ban', '/ban או /unban', 'חסימה או הסרת חסימה — פעולה רגישה'],
-      ['messages', '/clear <amount>', 'מחיקת הודעות אחרונות'],
-      ['channel', '/lock, /unlock, /slowmode', 'ניהול כתיבה וקצב בערוץ'],
-      ['nickname', '/nick <member> [nickname]', 'שינוי או איפוס כינוי']
+      ['warnings', '/warn, /warnings, /clearwarnings', 'ניהול אזהרות עם מזהה ייחודי לכל אזהרה'],
+      ['notes', '/note, /notes, /clearnotes', 'הערות צוות פרטיות שאינן נחשפות לחבר'],
+      ['timeout', '/timeout, /untimeout', 'הרחקה זמנית או ביטולה, כולל משך כמו 1h30m'],
+      ['members', '/kick, /nick, /voicekick', 'ניהול חברים, כינויים וחיבור קולי'],
+      ['bans', '/ban, /unban, /softban', 'חסימה, הסרת חסימה או חסימה רכה'],
+      ['messages', '/clear <amount>', 'מחיקה לפי חבר, בוטים, קישורים, קבצים או טקסט'],
+      ['channel', '/lock, /unlock, /hide, /unhide, /slowmode', 'ניהול כתיבה, נראות וקצב בערוץ']
     ]
   },
   admin: {

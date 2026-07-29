@@ -1,3 +1,3 @@
 import { moderationCommand } from './factory.js';
 
-export default moderationCommand('ban');
+export default moderationCommand('voicekick');
