@@ -31,7 +31,6 @@ img { max-width: 100%; height: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; z-index: 999; top: 8px; right: 8px; padding: 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); transform: translateY(-150%); }
 .skip-link:focus { transform: none; }
-.scroll-progress { position: fixed; z-index: 200; inset: 0 0 auto; height: 2px; transform: scaleX(0); transform-origin: right; background: linear-gradient(90deg,var(--cyan),var(--accent)); }
 .editil-background { position: fixed; inset: 0; z-index: -4; pointer-events: none; overflow: hidden; }
 .editil-background::before,.editil-background::after { content: ""; position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; opacity: .15; will-change: transform; }
 .editil-background::before { top: -48vmax; right: -22vmax; background: radial-gradient(circle,var(--primary),transparent 66%); animation: meshA 24s ease-in-out infinite alternate; }
@@ -311,8 +310,8 @@ dialog { color: var(--text); }
 .footer-links b { margin-bottom: 7px; color: #fff; }
 .footer-links a,.footer-social > span { color: #8d95aa; font-size: .82rem; transition: color .2s,transform .2s; }
 .footer-links a:hover { color: #fff; transform: translateX(-3px); }
-.footer-social small { margin-right: 5px; color: #586078; }
-.footer-bottom { position: relative; margin-top: 50px; padding-top: 20px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid rgba(255,255,255,.075); color: #6f778d; font-size: .7rem; }
+.footer-social small { margin-right: 5px; color: var(--muted); }
+.footer-bottom { position: relative; margin-top: 50px; padding-top: 20px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid rgba(255,255,255,.075); color: var(--muted); font-size: .7rem; }
 .footer-bottom p { margin: 0; }
 .back-top { position: fixed; z-index: 50; left: 20px; bottom: 20px; width: 46px; height: 46px; opacity: 0; pointer-events: none; transform: translateY(12px); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(13,15,24,.82); color: #fff; backdrop-filter: blur(14px); transition: opacity .25s,transform .25s; }
 .back-top.show { opacity: 1; pointer-events: auto; transform: none; }

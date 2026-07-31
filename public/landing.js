@@ -300,12 +300,9 @@
     $$('.faq-list details').forEach(other => { if (other !== item) other.open = false; });
   }));
 
-  // One requestAnimationFrame loop handles scroll progress and back-to-top visibility.
+  // One requestAnimationFrame loop handles back-to-top visibility without layout reads.
   let scrollFrame = 0;
-  let maxScroll = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
-  addEventListener('resize', () => { maxScroll = Math.max(document.documentElement.scrollHeight - innerHeight, 1); }, { passive: true });
   const updateScroll = () => {
-    $('.scroll-progress').style.transform = `scaleX(${scrollY / maxScroll})`;
     $('.back-top').classList.toggle('show', scrollY > 700);
     scrollFrame = 0;
   };
