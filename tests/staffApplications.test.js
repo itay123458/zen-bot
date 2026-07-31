@@ -151,7 +151,7 @@ test('studio v2 redesign stays responsive, lightweight and motion accessible', a
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
   assert.match(html, /studio-v2\.css\?v=5\.0\.0/);
-  assert.match(html, /עורכים טוב יותר/);
+  assert.match(html, /המקום שבו/);
   assert.match(html, /class="hero-tags"/);
   assert.match(css, /scroll-snap-type: x mandatory/);
   assert.match(css, /transform: perspective\(1200px\)/);
@@ -159,6 +159,24 @@ test('studio v2 redesign stays responsive, lightweight and motion accessible', a
   assert.doesNotMatch(css, /(^|[},])\s*canvas\s*\{|animation:\s*[^;]*box-shadow/i);
   assert.match(script, /--spot-x/);
   assert.match(script, /sectionObserver/);
+});
+
+test('reel v3 replaces the old hero structure with an accessible carousel', async () => {
+  const [html, css, script] = await Promise.all([
+    readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../public/reel-v3.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
+  ]);
+  assert.match(html, /reel-v3\.css\?v=5\.1\.0/);
+  assert.equal((html.match(/data-reel-slide/g) || []).length, 3);
+  assert.equal((html.match(/data-reel-dot=/g) || []).length, 3);
+  assert.match(html, /aria-roledescription="carousel"/);
+  assert.match(css, /\.editor-stage \{ display: none !important; \}/);
+  assert.match(css, /\.hero-copy \{ max-width: 920px; margin-inline: auto; \}/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(script, /showReelSlide/);
+  assert.match(script, /5200/);
+  assert.match(script, /document\.hidden/);
 });
 
 test('public command directory starts compact and can reveal every command', async () => {

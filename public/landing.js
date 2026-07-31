@@ -55,6 +55,43 @@
     if (target) sectionObserver.observe(target);
   });
 
+  // Cinematic hero reel: manual controls plus a quiet, pausable auto-advance.
+  const reel = $('.hero-reel');
+  const reelSlides = $$('[data-reel-slide]');
+  const reelDots = $$('[data-reel-dot]');
+  const reelCounter = $('#reelCounter');
+  let reelIndex = 0;
+  let reelTimer = null;
+  const showReelSlide = index => {
+    reelIndex = (index + reelSlides.length) % reelSlides.length;
+    reelSlides.forEach((slide, slideIndex) => {
+      const active = slideIndex === reelIndex;
+      slide.classList.toggle('is-active', active);
+      slide.setAttribute('aria-hidden', String(!active));
+    });
+    reelDots.forEach((dot, dotIndex) => {
+      const active = dotIndex === reelIndex;
+      dot.classList.toggle('is-active', active);
+      dot.setAttribute('aria-pressed', String(active));
+    });
+    reelCounter.textContent = `${String(reelIndex + 1).padStart(2, '0')} / ${String(reelSlides.length).padStart(2, '0')}`;
+  };
+  const stopReel = () => { clearInterval(reelTimer); reelTimer = null; };
+  const startReel = () => {
+    if (reduced || document.hidden || reelTimer || reelSlides.length < 2) return;
+    reelTimer = setInterval(() => showReelSlide(reelIndex + 1), 5200);
+  };
+  if (reel && reelSlides.length) {
+    $('[data-reel-prev]').addEventListener('click', () => { showReelSlide(reelIndex - 1); stopReel(); startReel(); });
+    $('[data-reel-next]').addEventListener('click', () => { showReelSlide(reelIndex + 1); stopReel(); startReel(); });
+    reelDots.forEach(dot => dot.addEventListener('click', () => { showReelSlide(Number(dot.dataset.reelDot)); stopReel(); startReel(); }));
+    reel.addEventListener('pointerenter', stopReel, { passive: true });
+    reel.addEventListener('pointerleave', startReel, { passive: true });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopReel(); else startReel(); });
+    showReelSlide(0);
+    startReel();
+  }
+
   const number = value => new Intl.NumberFormat('he-IL').format(value);
   const count = (element, target) => {
     if (reduced || target < 2) { element.textContent = number(target); return; }
