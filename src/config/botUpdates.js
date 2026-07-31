@@ -1,16 +1,16 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '4.6.0',
+  version: '4.6.1',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
   newFeatures: [
-    'נוספו פקודות ניהול חדשות: /softban, /untimeout, /note, /notes, /clearnotes, /hide, /unhide ו־/voicekick',
+    'נוספה הפקודה /stealsticker להעתקת מדבקה מהודעת Discord אל השרת באמצעות קישור להודעה',
   ],
   fixes: [
-    'כל פקודות הניהול נבנו מחדש עם בדיקות הרשאה והיררכיה אחידות, תיעוד פעולות והודעות ברורות בעברית',
+    'הפקודה בודקת הרשאות, גודל קובץ, גישה להודעה, שם כפול ומקום פנוי לפני יצירת המדבקה',
   ],
   improvements: [
-    '/clear קיבלה מסננים לפי חבר, בוטים, קישורים, קבצים וטקסט; /timeout תומכת במשך משולב כמו 1h30m',
+    'נוסף תיעוד אוטומטי ללוגים והודעות שגיאה פרטיות וברורות בעברית',
   ],
   changelogUrl: null,
   imageUrl: null,

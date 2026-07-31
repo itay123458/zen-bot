@@ -25,6 +25,7 @@ export const STAFF_HELP_CATEGORIES = Object.freeze({
       ['members', '/kick, /nick, /voicekick', 'ניהול חברים, כינויים וחיבור קולי'],
       ['bans', '/ban, /unban, /softban', 'חסימה, הסרת חסימה או חסימה רכה'],
       ['messages', '/clear <amount>', 'מחיקה לפי חבר, בוטים, קישורים, קבצים או טקסט'],
+      ['stickers', '/stealsticker <message_link>', 'העתקת מדבקה מהודעה אל השרת'],
       ['channel', '/lock, /unlock, /hide, /unhide, /slowmode', 'ניהול כתיבה, נראות וקצב בערוץ']
     ]
   },
