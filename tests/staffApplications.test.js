@@ -67,17 +67,16 @@ test('website editing tutorials are privacy enhanced and click to load', async (
 test('public command grid cannot create horizontal page overflow', async () => {
   const [html, css, script, worker] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../public/animations.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
-    assert.match(html, /animations\.css\?v=4\.5\.0/);
-    assert.match(html, /redesign\.css\?v=4\.5\.0/);
+    assert.match(html, /premium\.css\?v=6\.0\.0/);
     assert.match(html, /class="editor-stage/);
     assert.match(html, /class="creative-ticker"/);
-  assert.match(css, /html, body \{[^}]*overflow-x: clip/);
+  assert.match(css, /html,body \{[^}]*overflow-x: clip/);
   assert.match(css, /\.commands-section \{[^}]*overflow-x: clip/);
-  assert.match(css, /\.commands-section > \.shell \{[^}]*margin-right: auto; margin-left: auto/);
+  assert.match(css, /\.commands-section > \.shell \{[^}]*margin-inline: auto/);
   assert.match(css, /\.public-command-grid \{[^}]*repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css, /\.public-command-grid article \{[^}]*min-width: 0/);
   assert.match(script, /containCommandLayout/);
@@ -144,35 +143,39 @@ test('hero editor stage plays a custom EditIL animation without a personal recor
   assert.match(script, /20000/);
 });
 
-test('studio v2 redesign stays responsive, lightweight and motion accessible', async () => {
+test('premium v6 redesign stays responsive, lightweight and motion accessible', async () => {
   const [html, css, script] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../public/studio-v2.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /studio-v2\.css\?v=5\.0\.0/);
-  assert.match(html, /המקום שבו/);
-  assert.match(html, /class="hero-tags"/);
+  assert.match(html, /premium\.css\?v=6\.0\.0/);
+  assert.match(html, /קהילת העורכים/);
+  assert.match(html, /הבית של כל יוצר תוכן, עורך וידאו ומעצב/);
+  assert.match(html, /class="hero-float/);
   assert.match(css, /scroll-snap-type: x mandatory/);
-  assert.match(css, /transform: perspective\(1200px\)/);
+  assert.match(css, /perspective:\s*1500px/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /(^|[},])\s*canvas\s*\{|animation:\s*[^;]*box-shadow/i);
+  assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   assert.match(script, /--spot-x/);
   assert.match(script, /sectionObserver/);
+  assert.match(script, /hardwareConcurrency/);
+  assert.match(script, /button-ripple/);
 });
 
-test('reel v3 replaces the old hero structure with an accessible carousel', async () => {
+test('premium hero uses an accessible cinematic monitor carousel', async () => {
   const [html, css, script] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../public/reel-v3.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /reel-v3\.css\?v=5\.1\.0/);
+  assert.match(html, /premium\.css\?v=6\.0\.0/);
   assert.equal((html.match(/data-reel-slide/g) || []).length, 3);
   assert.equal((html.match(/data-reel-dot=/g) || []).length, 3);
   assert.match(html, /aria-roledescription="carousel"/);
-  assert.match(css, /\.editor-stage \{ display: none !important; \}/);
-  assert.match(css, /\.hero-copy \{ max-width: 920px; margin-inline: auto; \}/);
+  assert.match(css, /\.legacy-discord-preview,\.editor-stage \{ display: none !important; \}/);
+  assert.match(css, /\.hero-reel/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(script, /showReelSlide/);
   assert.match(script, /5200/);

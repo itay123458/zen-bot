@@ -6,8 +6,14 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const lowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+    || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  document.documentElement.classList.toggle('low-power', Boolean(lowPower));
   const state = { ready: false, stats: {} };
   $('#year').textContent = new Date().getFullYear();
+
+  // Keep the branded loader brief and deterministic, even when third-party images are slow.
+  requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('loaded')));
 
   // Keep the RTL command catalogue anchored to the visual viewport.
   const containCommandLayout = () => {
@@ -36,13 +42,39 @@
   $$('.reveal, .bento, .bot-copy, .public-command-grid').forEach(element => revealObserver.observe(element));
 
   // Lightweight card lighting follows the pointer without triggering layout changes.
-  if (finePointer && !reduced) {
+  if (finePointer && !reduced && !lowPower) {
     $$('.bento-card').forEach(card => card.addEventListener('pointermove', event => {
       const bounds = card.getBoundingClientRect();
       card.style.setProperty('--spot-x', `${event.clientX - bounds.left}px`);
       card.style.setProperty('--spot-y', `${event.clientY - bounds.top}px`);
     }, { passive: true }));
   }
+
+  // Premium button feedback: transform-only magnetic hover and a contained click ripple.
+  $$('.btn, .footer-join').forEach(button => {
+    if (finePointer && !reduced && !lowPower) {
+      button.addEventListener('pointermove', event => {
+        const bounds = button.getBoundingClientRect();
+        const x = (event.clientX - bounds.left - bounds.width / 2) * .1;
+        const y = (event.clientY - bounds.top - bounds.height / 2) * .1;
+        button.style.setProperty('--mag-x', `${x.toFixed(2)}px`);
+        button.style.setProperty('--mag-y', `${y.toFixed(2)}px`);
+      }, { passive: true });
+      button.addEventListener('pointerleave', () => {
+        button.style.setProperty('--mag-x', '0px');
+        button.style.setProperty('--mag-y', '0px');
+      });
+    }
+    button.addEventListener('click', event => {
+      const bounds = button.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple button-ripple';
+      ripple.style.left = `${event.clientX - bounds.left}px`;
+      ripple.style.top = `${event.clientY - bounds.top}px`;
+      button.append(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+    });
+  });
 
   // Keep the compact navigation in sync with the section currently in view.
   const navLinks = $$('.site-header nav a[href^="#"]');
