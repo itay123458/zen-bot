@@ -71,15 +71,15 @@ test('public command grid cannot create horizontal page overflow', async () => {
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
-    assert.match(html, /premium\.css\?v=6\.0\.1/);
-    assert.match(html, /class="editor-stage/);
+    assert.match(html, /premium\.css\?v=6\.1\.0/);
+    assert.doesNotMatch(html, /class="editor-stage/);
     assert.match(html, /class="creative-ticker"/);
   assert.match(css, /html,body \{[^}]*overflow-x: clip/);
   assert.match(css, /\.commands-section \{[^}]*overflow-x: clip/);
   assert.match(css, /\.commands-section > \.shell \{[^}]*margin-inline: auto/);
   assert.match(css, /\.public-command-grid \{[^}]*repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css, /\.public-command-grid article \{[^}]*min-width: 0/);
-  assert.match(script, /containCommandLayout/);
+  assert.doesNotMatch(script, /containCommandLayout/);
   assert.match(worker, /const siteResponse[\s\S]*?s-maxage=300/);
   assert.match(worker, /cachePublicResponse/);
   assert.match(worker, /sitemap\.xml/);
@@ -89,30 +89,27 @@ test('public command grid cannot create horizontal page overflow', async () => {
 test('custom animated background stays lightweight and accessible', async () => {
   const [html, css, script, worker] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../public/animations.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
   assert.match(html, /class="editil-background"/);
-  assert.match(css, /@keyframes bg-playhead/);
-  assert.doesNotMatch(css, /@keyframes bg-orbit/);
-  assert.doesNotMatch(css, /filter: blur\(75px\)/);
+  assert.match(css, /--bg: #080a12/);
+  assert.match(css, /--surface: #111523/);
+  assert.match(css, /--muted: #aeb5d1/);
+  assert.match(css, /\.bg-orb\.violet/);
+  assert.doesNotMatch(css, /filter: blur\((?:7[0-9]|[89][0-9]|[1-9][0-9]{2,})px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /canvas/);
-  assert.match(css, /--brand: #2f80ff/);
-  assert.match(css, /--purple: #ff4fae/);
-  assert.match(css, /linear-gradient\(90deg,#fff 0%,#72b7ff 42%,#ff5db8 100%\)/);
-  assert.match(css, /\.channel-browser\.tilt-card::after \{ display: none/);
-  assert.match(css, /@media \(max-width: 1200px\) \{[\s\S]*?\.discord-card \.float-note \{ display: none/);
-  assert.match(css, /\.discord-card \.servers,[\s\S]*?\.discord-card \.channels \{ display: none/);
-  assert.match(css, /\.bot-visual \{ min-height: 245px/);
+  assert.match(css, /\.page-hidden \.editil-background::before/);
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*?\.editil-background::before,[^}]*animation: none/);
   assert.match(script, /entry\.target\.textContent = '—'/);
   assert.match(script, /const hasLiveStatus = Boolean\(data\.updatedAt\)/);
   assert.match(script, /'המצב מתעדכן'/);
   assert.match(worker, /MAX_STATUS_AGE_MS = 11 \* 60_000/);
   assert.match(html, /class="section shell explore-section" id="explore"/);
   assert.match(html, /data-open-dialog="faqDialog"/);
-  assert.match(css, /\.explore-grid \{ display: grid; grid-template-columns: repeat\(6,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.explore-grid \{ display: grid; grid-template-columns: repeat\(5,1fr\)/);
   assert.match(html, /class="bot-stats" hidden/);
   assert.match(script, /\.bot-stats'\)\.hidden = !hasLiveStatus/);
   assert.match(worker, /invites\/6Hu8xpTYqQ\?with_counts=true/);
@@ -121,26 +118,16 @@ test('custom animated background stays lightweight and accessible', async () => 
   assert.match(script, /\.status-chip'\)\.hidden = !hasLiveStatus/);
 });
 
-test('hero editor stage plays a custom EditIL animation without a personal recording', async () => {
+test('legacy hidden hero and its expensive controller are removed', async () => {
   const [html, script] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /class="site-film"/);
-  assert.match(html, /film-community/);
-  assert.match(html, /film-bot/);
-  assert.match(html, /film-finale/);
-  assert.match(html, /film-mini-browser/);
-  assert.match(html, /film-video-post/);
-  assert.match(html, /film-reactions/);
-  assert.match(html, /film-slash-use/);
-  assert.match(html, /film-bot-response/);
-  assert.match(html, /film-leaderboard/);
-  assert.match(html, /film-progress/);
-  assert.match(html, /film-bot-avatar"><img/);
-  assert.doesNotMatch(html, /editil-site-tour\.mp4/);
-  assert.match(script, /film-finished/);
-  assert.match(script, /20000/);
+  assert.doesNotMatch(html, /editor-stage|site-film|legacy-discord-preview/);
+  assert.match(html, /class="reel-ui reel-chat"/);
+  assert.match(html, /class="channel-browser/);
+  assert.doesNotMatch(script, /film-finished|stagePlay|offsetWidth|setInterval/);
+  assert.doesNotMatch(script, /pointermove/);
 });
 
 test('premium v6 redesign stays responsive, lightweight and motion accessible', async () => {
@@ -149,7 +136,7 @@ test('premium v6 redesign stays responsive, lightweight and motion accessible', 
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=6\.0\.1/);
+  assert.match(html, /premium\.css\?v=6\.1\.0/);
   assert.match(html, /קהילת העורכים/);
   assert.match(html, /הבית של כל יוצר תוכן, עורך וידאו ומעצב/);
   assert.match(html, /class="hero-float/);
@@ -158,7 +145,7 @@ test('premium v6 redesign stays responsive, lightweight and motion accessible', 
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /(^|[},])\s*canvas\s*\{|animation:\s*[^;]*box-shadow/i);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
-  assert.match(script, /--spot-x/);
+  assert.doesNotMatch(script, /--spot-x/);
   assert.match(script, /sectionObserver/);
   assert.match(script, /hardwareConcurrency/);
   assert.match(script, /button-ripple/);
@@ -170,35 +157,34 @@ test('premium hero uses an accessible cinematic monitor carousel', async () => {
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=6\.0\.1/);
+  assert.match(html, /premium\.css\?v=6\.1\.0/);
   assert.equal((html.match(/data-reel-slide/g) || []).length, 3);
   assert.equal((html.match(/data-reel-dot=/g) || []).length, 3);
   assert.match(html, /aria-roledescription="carousel"/);
-  assert.match(css, /\.legacy-discord-preview,\.editor-stage \{ display: none !important; \}/);
+  assert.doesNotMatch(css, /legacy-discord-preview|editor-stage/);
   assert.match(css, /\.hero-reel/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(script, /showReelSlide/);
-  assert.match(script, /5200/);
-  assert.match(script, /document\.hidden/);
+  assert.doesNotMatch(script, /setInterval/);
+  assert.match(script, /visibilitychange/);
 });
 
 test('public command directory starts compact and can reveal every command', async () => {
   const [html, css, script] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../public/animations.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
   assert.match(html, /id="commandExpand"[^>]*aria-expanded="false"/);
   assert.match(script, /commandsExpanded = false/);
   assert.match(script, /compact && matches > 6/);
   assert.match(script, /commandExpand\.addEventListener\('click'/);
-  assert.match(css, /\.section \{ padding-block: 62px; \}/);
+  assert.match(css, /\.section \{[^}]*padding-block: 150px/);
   assert.match(html, /<dialog class="staff-application-dialog" id="staffApplicationDialog">/);
   assert.match(script, /staffDialog\.showModal\(\)/);
   assert.equal((html.match(/<details class="compact-panel">/g) || []).length, 0);
   assert.equal((html.match(/<dialog class="content-dialog/g) || []).length, 4);
   assert.match(script, /\$\$\('\[data-open-dialog\]'\)/);
-  assert.match(css, /\.compact-host \{ padding-block: 10px; \}/);
   assert.doesNotMatch(html, /class="software shell/);
   assert.doesNotMatch(html, /class="cta shell/);
 });

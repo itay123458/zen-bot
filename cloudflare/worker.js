@@ -5,8 +5,6 @@ import accessibilityHtml from '../public/accessibility.html';
 import legalCss from '../public/legal-v1.css';
 import accessibilityCss from '../public/accessibility.css';
 import indexHtml from '../public/index.html';
-import landingCss from '../public/landing.css';
-import animationsCss from '../public/animations.css';
 
 const STATUS_KEY = 'latest';
 const MAX_STATUS_AGE_MS = 11 * 60_000;
@@ -86,8 +84,6 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/' || url.pathname === '/index.html') return siteResponse(indexHtml, 'text/html');
-    if (url.pathname === '/landing.css') return siteResponse(landingCss, 'text/css', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
-    if (url.pathname === '/animations.css') return siteResponse(animationsCss, 'text/css', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
     if (url.pathname === '/favicon.ico') return Response.redirect(`${url.origin}/favicon.svg`, 308);
     if (url.pathname === '/robots.txt') return siteResponse(ROBOTS, 'text/plain', 'public, max-age=3600, s-maxage=86400');
     if (url.pathname === '/sitemap.xml') return siteResponse(SITEMAP, 'application/xml', 'public, max-age=3600, s-maxage=86400');

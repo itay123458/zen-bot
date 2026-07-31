@@ -5,27 +5,14 @@
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const lowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
     || (navigator.deviceMemory && navigator.deviceMemory <= 4);
   document.documentElement.classList.toggle('low-power', Boolean(lowPower));
+  document.addEventListener('visibilitychange', () => {
+    document.documentElement.classList.toggle('page-hidden', document.hidden);
+  });
   const state = { ready: false, stats: {} };
   $('#year').textContent = new Date().getFullYear();
-
-  // Keep the branded loader brief and deterministic, even when third-party images are slow.
-  requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('loaded')));
-
-  // Keep the RTL command catalogue anchored to the visual viewport.
-  const containCommandLayout = () => {
-    const shell = $('.commands-section > .shell');
-    if (!shell) return;
-    shell.style.insetInline = '0';
-    shell.style.marginInline = 'auto';
-    shell.style.translate = 'none';
-    shell.style.transform = 'none';
-  };
-  containCommandLayout();
-  addEventListener('resize', containCommandLayout, { passive: true });
 
   // One-time section reveals and staggered groups.
   $$('.bento-card, .bot-tools span, .bot-stats div, .public-command-grid article').forEach((item, index) => {
@@ -41,30 +28,8 @@
   }), { threshold: .12, rootMargin: '0px 0px -30px' });
   $$('.reveal, .bento, .bot-copy, .public-command-grid').forEach(element => revealObserver.observe(element));
 
-  // Lightweight card lighting follows the pointer without triggering layout changes.
-  if (finePointer && !reduced && !lowPower) {
-    $$('.bento-card').forEach(card => card.addEventListener('pointermove', event => {
-      const bounds = card.getBoundingClientRect();
-      card.style.setProperty('--spot-x', `${event.clientX - bounds.left}px`);
-      card.style.setProperty('--spot-y', `${event.clientY - bounds.top}px`);
-    }, { passive: true }));
-  }
-
-  // Premium button feedback: transform-only magnetic hover and a contained click ripple.
+  // Contained click feedback without continuous pointer tracking.
   $$('.btn, .footer-join').forEach(button => {
-    if (finePointer && !reduced && !lowPower) {
-      button.addEventListener('pointermove', event => {
-        const bounds = button.getBoundingClientRect();
-        const x = (event.clientX - bounds.left - bounds.width / 2) * .1;
-        const y = (event.clientY - bounds.top - bounds.height / 2) * .1;
-        button.style.setProperty('--mag-x', `${x.toFixed(2)}px`);
-        button.style.setProperty('--mag-y', `${y.toFixed(2)}px`);
-      }, { passive: true });
-      button.addEventListener('pointerleave', () => {
-        button.style.setProperty('--mag-x', '0px');
-        button.style.setProperty('--mag-y', '0px');
-      });
-    }
     button.addEventListener('click', event => {
       const bounds = button.getBoundingClientRect();
       const ripple = document.createElement('span');
@@ -87,13 +52,12 @@
     if (target) sectionObserver.observe(target);
   });
 
-  // Cinematic hero reel: manual controls plus a quiet, pausable auto-advance.
+  // Cinematic hero reel: manual controls avoid continuous background DOM updates.
   const reel = $('.hero-reel');
   const reelSlides = $$('[data-reel-slide]');
   const reelDots = $$('[data-reel-dot]');
   const reelCounter = $('#reelCounter');
   let reelIndex = 0;
-  let reelTimer = null;
   const showReelSlide = index => {
     reelIndex = (index + reelSlides.length) % reelSlides.length;
     reelSlides.forEach((slide, slideIndex) => {
@@ -108,20 +72,11 @@
     });
     reelCounter.textContent = `${String(reelIndex + 1).padStart(2, '0')} / ${String(reelSlides.length).padStart(2, '0')}`;
   };
-  const stopReel = () => { clearInterval(reelTimer); reelTimer = null; };
-  const startReel = () => {
-    if (reduced || document.hidden || reelTimer || reelSlides.length < 2) return;
-    reelTimer = setInterval(() => showReelSlide(reelIndex + 1), 5200);
-  };
   if (reel && reelSlides.length) {
-    $('[data-reel-prev]').addEventListener('click', () => { showReelSlide(reelIndex - 1); stopReel(); startReel(); });
-    $('[data-reel-next]').addEventListener('click', () => { showReelSlide(reelIndex + 1); stopReel(); startReel(); });
-    reelDots.forEach(dot => dot.addEventListener('click', () => { showReelSlide(Number(dot.dataset.reelDot)); stopReel(); startReel(); }));
-    reel.addEventListener('pointerenter', stopReel, { passive: true });
-    reel.addEventListener('pointerleave', startReel, { passive: true });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stopReel(); else startReel(); });
+    $('[data-reel-prev]').addEventListener('click', () => showReelSlide(reelIndex - 1));
+    $('[data-reel-next]').addEventListener('click', () => showReelSlide(reelIndex + 1));
+    reelDots.forEach(dot => dot.addEventListener('click', () => showReelSlide(Number(dot.dataset.reelDot))));
     showReelSlide(0);
-    startReel();
   }
 
   const number = value => new Intl.NumberFormat('he-IL').format(value);
@@ -177,38 +132,6 @@
       state.ready = true;
       $$('[data-counter]').forEach(element => { counterObserver.unobserve(element); counterObserver.observe(element); });
     });
-
-  // The hero editing stage is intentionally click-driven so it stays lightweight.
-  const stage = $('.editor-stage');
-  const stagePlay = $('.stage-play');
-  let stageTimer;
-  if (stage && stagePlay) stagePlay.addEventListener('click', () => {
-    if (stage.classList.contains('is-playing')) {
-      stage.classList.remove('is-playing');
-      stage.classList.add('is-paused');
-      stagePlay.textContent = '▶';
-      stagePlay.setAttribute('aria-label', 'המשך אנימציית האתר');
-      clearTimeout(stageTimer);
-      return;
-    }
-    if (!stage.classList.contains('is-paused')) {
-      stage.classList.remove('film-active');
-      stage.classList.remove('film-finished');
-      void stage.offsetWidth;
-      stage.classList.add('film-active');
-    }
-    stage.classList.remove('is-paused');
-    stage.classList.add('is-playing');
-    stagePlay.textContent = '❚❚';
-    stagePlay.setAttribute('aria-label', 'השהיית אנימציית האתר');
-    stageTimer = setTimeout(() => {
-      stage.classList.remove('is-playing');
-      stage.classList.remove('film-active');
-      stage.classList.add('film-finished');
-      stagePlay.textContent = '↻';
-      stagePlay.setAttribute('aria-label', 'ניגון חוזר של אנימציית האתר');
-    }, 20000);
-  });
 
   // Channel tabs: mouse, touch and standard arrow-key navigation.
   const channelTabs = $$('.channel-tabs [role="tab"]');
@@ -377,33 +300,12 @@
     $$('.faq-list details').forEach(other => { if (other !== item) other.open = false; });
   }));
 
-  // Desktop-only pointer tilt; no idle animation or touch listeners.
-  if (finePointer && !reduced) $$('.tilt-card').forEach(card => {
-    let pointerFrame = 0;
-    card.addEventListener('pointermove', event => {
-      if (pointerFrame || document.hidden) return;
-      pointerFrame = requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - .5;
-        const y = (event.clientY - rect.top) / rect.height - .5;
-        card.style.setProperty('--tilt-x', `${(-y * 3).toFixed(2)}deg`);
-        card.style.setProperty('--tilt-y', `${(x * 4).toFixed(2)}deg`);
-        card.style.setProperty('--light-x', `${(x + .5) * 100}%`);
-        pointerFrame = 0;
-      });
-    }, { passive: true });
-    card.addEventListener('pointerleave', () => {
-      card.style.setProperty('--tilt-x', '0deg');
-      card.style.setProperty('--tilt-y', '0deg');
-      card.style.setProperty('--light-x', '50%');
-    });
-  });
-
   // One requestAnimationFrame loop handles scroll progress and back-to-top visibility.
   let scrollFrame = 0;
+  let maxScroll = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
+  addEventListener('resize', () => { maxScroll = Math.max(document.documentElement.scrollHeight - innerHeight, 1); }, { passive: true });
   const updateScroll = () => {
-    const max = document.documentElement.scrollHeight - innerHeight;
-    $('.scroll-progress').style.transform = `scaleX(${max ? scrollY / max : 0})`;
+    $('.scroll-progress').style.transform = `scaleX(${scrollY / maxScroll})`;
     $('.back-top').classList.toggle('show', scrollY > 700);
     scrollFrame = 0;
   };
@@ -413,17 +315,4 @@
   updateScroll();
   $('.back-top').addEventListener('click', () => scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }));
 
-  // Single subtle desktop cursor glow, paused while the tab is hidden.
-  if (finePointer && !reduced) {
-    const glow = $('.cursor-glow');
-    let glowFrame = 0, x = -100, y = -100;
-    addEventListener('pointermove', event => {
-      x = event.clientX; y = event.clientY;
-      if (glowFrame || document.hidden) return;
-      glowFrame = requestAnimationFrame(() => {
-        glow.style.transform = `translate3d(${x}px,${y}px,0)`;
-        glowFrame = 0;
-      });
-    }, { passive: true });
-  }
 })();
