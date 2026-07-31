@@ -399,16 +399,12 @@
     });
   });
 
-  // One requestAnimationFrame loop handles scroll progress, back-to-top and active nav.
-  const sections = $$('main section[id]');
+  // One requestAnimationFrame loop handles scroll progress and back-to-top visibility.
   let scrollFrame = 0;
   const updateScroll = () => {
     const max = document.documentElement.scrollHeight - innerHeight;
     $('.scroll-progress').style.transform = `scaleX(${max ? scrollY / max : 0})`;
     $('.back-top').classList.toggle('show', scrollY > 700);
-    let active = '';
-    sections.forEach(section => { if (section.getBoundingClientRect().top <= 170) active = section.id; });
-    $$('.site-header nav a').forEach(link => link.classList.toggle('active', link.hash === `#${active}`));
     scrollFrame = 0;
   };
   addEventListener('scroll', () => {

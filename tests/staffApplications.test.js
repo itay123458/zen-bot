@@ -71,7 +71,7 @@ test('public command grid cannot create horizontal page overflow', async () => {
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
-    assert.match(html, /premium\.css\?v=6\.0\.0/);
+    assert.match(html, /premium\.css\?v=6\.0\.1/);
     assert.match(html, /class="editor-stage/);
     assert.match(html, /class="creative-ticker"/);
   assert.match(css, /html,body \{[^}]*overflow-x: clip/);
@@ -149,7 +149,7 @@ test('premium v6 redesign stays responsive, lightweight and motion accessible', 
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=6\.0\.0/);
+  assert.match(html, /premium\.css\?v=6\.0\.1/);
   assert.match(html, /קהילת העורכים/);
   assert.match(html, /הבית של כל יוצר תוכן, עורך וידאו ומעצב/);
   assert.match(html, /class="hero-float/);
@@ -170,7 +170,7 @@ test('premium hero uses an accessible cinematic monitor carousel', async () => {
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=6\.0\.0/);
+  assert.match(html, /premium\.css\?v=6\.0\.1/);
   assert.equal((html.match(/data-reel-slide/g) || []).length, 3);
   assert.equal((html.match(/data-reel-dot=/g) || []).length, 3);
   assert.match(html, /aria-roledescription="carousel"/);
