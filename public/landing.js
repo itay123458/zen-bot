@@ -35,6 +35,26 @@
   }), { threshold: .12, rootMargin: '0px 0px -30px' });
   $$('.reveal, .bento, .bot-copy, .public-command-grid').forEach(element => revealObserver.observe(element));
 
+  // Lightweight card lighting follows the pointer without triggering layout changes.
+  if (finePointer && !reduced) {
+    $$('.bento-card').forEach(card => card.addEventListener('pointermove', event => {
+      const bounds = card.getBoundingClientRect();
+      card.style.setProperty('--spot-x', `${event.clientX - bounds.left}px`);
+      card.style.setProperty('--spot-y', `${event.clientY - bounds.top}px`);
+    }, { passive: true }));
+  }
+
+  // Keep the compact navigation in sync with the section currently in view.
+  const navLinks = $$('.site-header nav a[href^="#"]');
+  const sectionObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    navLinks.forEach(link => link.classList.toggle('is-active', link.hash === `#${entry.target.id}`));
+  }), { rootMargin: '-30% 0px -60%', threshold: 0 });
+  navLinks.forEach(link => {
+    const target = $(link.hash);
+    if (target) sectionObserver.observe(target);
+  });
+
   const number = value => new Intl.NumberFormat('he-IL').format(value);
   const count = (element, target) => {
     if (reduced || target < 2) { element.textContent = number(target); return; }

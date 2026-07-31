@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d14">
+  <meta name="theme-color" content="#070812">
   <meta name="description" content="EditIL — קהילת עורכי הווידאו בישראל. משאבים, ביקורת, עבודות, תחרויות ויוצרים במקום אחד.">
   <meta property="og:title" content="EditIL | קהילת העורכים בישראל">
   <meta property="og:description" content="המקום של עורכי הווידאו בישראל ליצור, ללמוד ולהתקדם יחד.">
@@ -12,7 +12,8 @@
   <link rel="stylesheet" href="/landing.css?v=4.5.0">
   <link rel="stylesheet" href="/animations.css?v=4.5.0">
   <link rel="stylesheet" href="/redesign.css?v=4.5.0">
-  <script src="/landing.js?v=4.5.0" defer></script>
+  <link rel="stylesheet" href="/studio-v2.css?v=5.0.0">
+  <script src="/landing.js?v=5.0.0" defer></script>
   <title>EditIL | קהילת העורכים בישראל</title>
 </head>
 <body>
@@ -42,13 +43,14 @@
     <section class="hero shell">
       <div class="hero-copy reveal reveal-right">
         <div class="live-label"><i></i><span data-member-copy>קהילת עורכי הווידאו בישראל</span></div>
-        <h1>הפריים הבא<br><em>מתחיל איתכם.</em></h1>
-        <p>הקהילה הישראלית שבה עורכי וידאו נפגשים, משתפים עבודות, מקבלים משוב אמיתי והופכים רעיונות לפרויקטים.</p>
+        <h1>עורכים טוב יותר.<br><em>ביחד.</em></h1>
+        <p>הבית הישראלי לעורכי וידאו שרוצים להשתפר, להציג עבודות, למצוא שותפים ולהפוך את הפריים הבא למשהו שאי אפשר לפספס.</p>
         <div class="actions"><a class="btn primary" href="https://discord.gg/6Hu8xpTYqQ" target="_blank" rel="noopener">הצטרפות חינם לקהילה</a><a class="btn secondary" href="#community">מה מחכה לי בפנים?</a></div>
+        <div class="hero-tags" aria-label="יתרונות הקהילה"><span>משוב אמיתי</span><span>משאבים לעורכים</span><span>שיתופי פעולה</span></div>
         <div class="hero-proof"><div class="proof-icons"><span>🎬</span><span>🎨</span><span>🎮</span><span>✨</span></div><p><strong data-stat="members">—</strong> חברים יוצרים איתנו</p></div>
       </div>
 
-      <div class="discord-card reveal reveal-left tilt-card" aria-label="הצצה לשרת EditIL">
+      <div class="discord-card reveal reveal-left tilt-card legacy-discord-preview" aria-label="הצצה לשרת EditIL">
         <div class="window-top"><span><i></i><i></i><i></i></span><b>Discord — EditIL</b></div>
         <div class="discord-layout">
           <aside class="servers"><img src="https://cdn.discordapp.com/icons/1526671786387705907/d2dae6973a167f36b79f04bd4c769fed.webp?size=64" alt=""><span>🎬</span><span>🎵</span><span>🏆</span><span>＋</span></aside>
@@ -95,7 +97,7 @@
     </section>
 
     <section class="section shell" id="community">
-      <header class="section-title reveal"><span>למה להצטרף?</span><h2>כל מה שעורך צריך.<br><em>בקהילה אחת.</em></h2><p>נכנסים, משתפים, לומדים ומתקדמים עם אנשים שמבינים בדיוק מה אתם יוצרים.</p></header>
+      <header class="section-title reveal"><span>הסטודיו הקהילתי שלכם</span><h2>מעלים עבודה.<br><em>עולים רמה.</em></h2><p>מרעיון גולמי ועד פרויקט מוכן — יש כאן אנשים, כלים והזדמנויות לכל שלב.</p></header>
       <div class="bento">
         <article class="bento-card wide showcase-card reveal"><span class="card-icon">🎬</span><small>שיתוף יצירות</small><h3>הבמה שלכם</h3><p>שתפו עריכות, רנדרים ופרויקטים. קבלו תגובות מעורכים שמבינים את התהליך.</p><div class="ae-timeline" aria-label="טיימליין עריכה בסגנון After Effects"><div class="ae-toolbar"><b><i class="ae-live"></i> הקומפוזיציה שלי</b><span>00:00:08:14</span></div><div class="ae-ruler"><span>0s</span><span>2s</span><span>4s</span><span>6s</span></div><div class="ae-track"><span>🎥 עריכה ראשית</span><i class="clip main"><b></b><b></b></i></div><div class="ae-track"><span>◆ כותרת פתיחה</span><i class="clip text"><b></b><b></b><b></b></i></div><div class="ae-track"><span>♫ מוזיקה</span><i class="clip audio"><b></b><b></b><b></b><b></b></i></div><div class="ae-playhead"></div></div></article>
         <article class="bento-card reveal"><span class="card-icon">📈</span><small>משוב מקצועי</small><h3>משוב שמקדם</h3><p>ביקורת מקצועית, עזרה טכנית ורעיונות לשיפור הפריים הבא.</p></article>
@@ -128,7 +130,7 @@
     </section>
 
     <section class="section shell explore-section" id="explore">
-      <header class="section-title reveal"><span>מידע וכלים</span><h2>כל מה שחשוב.<br><em>מסודר ופשוט.</em></h2><p>ערוצים, מדריכים, פקודות ומידע נוסף — בלי להעמיס על העמוד.</p></header>
+      <header class="section-title reveal"><span>בחרו לאן להיכנס</span><h2>כל EditIL.<br><em>בלחיצה אחת.</em></h2><p>החליקו בין הכלים ופתחו רק את מה שמעניין אתכם.</p></header>
       <div class="explore-grid reveal">
         <button type="button" data-open-dialog="channelsDialog"><span>💬</span><div><b>ערוצי השרת</b><small>קהילה, עריכה והזדמנויות</small></div><i>↗</i></button>
         <button type="button" data-open-dialog="tutorialsDialog"><span>🎓</span><div><b>מדריכים בעברית</b><small>אפטר אפקטס וקאפקט</small></div><i>↗</i></button>
@@ -139,8 +141,9 @@
     </section>
 
     <section class="join-section">
-      <h2>העריכה הבאה שלכם מתחילה כאן.</h2>
-      <p>הצטרפו בחינם, הציגו את עצמכם והכירו את קהילת עורכי הווידאו של ישראל.</p>
+      <span class="join-kicker">הפרויקט הבא כבר מחכה</span>
+      <h2>אל תערכו לבד.</h2>
+      <p>הצטרפו בחינם, הציגו את עצמכם והכירו עורכים שיודעים בדיוק כמה עבודה יש מאחורי כל שנייה.</p>
       <a class="btn primary" href="https://discord.gg/6Hu8xpTYqQ" target="_blank" rel="noopener">אני רוצה להצטרף לקהילה</a>
     </section>
 

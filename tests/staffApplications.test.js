@@ -144,6 +144,23 @@ test('hero editor stage plays a custom EditIL animation without a personal recor
   assert.match(script, /20000/);
 });
 
+test('studio v2 redesign stays responsive, lightweight and motion accessible', async () => {
+  const [html, css, script] = await Promise.all([
+    readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../public/studio-v2.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
+  ]);
+  assert.match(html, /studio-v2\.css\?v=5\.0\.0/);
+  assert.match(html, /עורכים טוב יותר/);
+  assert.match(html, /class="hero-tags"/);
+  assert.match(css, /scroll-snap-type: x mandatory/);
+  assert.match(css, /transform: perspective\(1200px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(css, /(^|[},])\s*canvas\s*\{|animation:\s*[^;]*box-shadow/i);
+  assert.match(script, /--spot-x/);
+  assert.match(script, /sectionObserver/);
+});
+
 test('public command directory starts compact and can reveal every command', async () => {
   const [html, css, script] = await Promise.all([
     readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
