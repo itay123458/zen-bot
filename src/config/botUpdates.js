@@ -1,16 +1,16 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '6.3.0',
+  version: '6.3.1',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
   newFeatures: [
-    'כרטיס מעקב Animal Company עוצב מחדש בסגנון AMB Tracker X.',
+    'כרטיס AMB Tracker X מציג כעת את תמונת המשחק הרשמית.',
   ],
   fixes: [
-    'גרסת הבנייה וזמן הפרסום מזוהים ומוצגים בצורה ברורה ועדכנית.',
+    'תוקן קישור התמונה הממוזערת של Animal Company.',
   ],
   improvements: [
-    'נוספו תמונה ממוזערת, חותמות זמן מקומיות וסימון אדום בולט לעדכון חדש.',
+    'התמונה נטענת ישירות מנכס Steam הרשמי והזמין.',
   ],
   changelogUrl: null,
   imageUrl: null,

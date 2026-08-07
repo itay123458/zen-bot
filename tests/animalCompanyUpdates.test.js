@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import command from '../src/commands/owner/ac.js';
-import { ANIMAL_COMPANY_CHANNEL_ID, ANIMAL_COMPANY_GUILD_ID, buildAnimalCompanyEmbed, categorizeReleaseNotes, extractAnimalCompanyVersion, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
+import { ANIMAL_COMPANY_CHANNEL_ID, ANIMAL_COMPANY_GUILD_ID, ANIMAL_COMPANY_THUMBNAIL_URL, buildAnimalCompanyEmbed, categorizeReleaseNotes, extractAnimalCompanyVersion, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
 
 test('/ac exposes an owner-oriented mods command group hidden by default', () => {
   const json = command.data.toJSON();
@@ -37,6 +37,7 @@ test('developer build embed matches the compact AMB tracker card', () => {
   assert.equal(json.color, 0xed1c24);
   assert.equal(json.author.name, 'AMB Tracker X');
   assert.equal(json.title, 'New Developer Build');
+  assert.equal(json.thumbnail.url, ANIMAL_COMPANY_THUMBNAIL_URL);
   assert.equal(json.fields[0].name, '🟢 Updated Version:');
   assert.equal(json.fields[0].value, '```\n1.86.0.3325\n```');
   assert.match(json.fields[1].value, /^\(<t:\d+:R>\) <t:\d+:F>$/);

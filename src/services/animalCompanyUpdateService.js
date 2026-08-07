@@ -6,7 +6,7 @@ export const ANIMAL_COMPANY_GUILD_ID = '1502383010656288949';
 export const ANIMAL_COMPANY_CHANNEL_ID = '1502388916895088740';
 export const ANIMAL_COMPANY_NEWS_URL = `https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${ANIMAL_COMPANY_APP_ID}&count=10&maxlength=10000&format=json`;
 export const ANIMAL_COMPANY_STORE_URL = `https://store.steampowered.com/app/${ANIMAL_COMPANY_APP_ID}/Animal_Company/`;
-export const ANIMAL_COMPANY_THUMBNAIL_URL = `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${ANIMAL_COMPANY_APP_ID}/header.jpg`;
+export const ANIMAL_COMPANY_THUMBNAIL_URL = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4551040/8b86cf67d63d6bda4c71209070e0ff866d8e6bfe/capsule_616x353.jpg';
 export const ANIMAL_COMPANY_POLL_INTERVAL_MS = 15 * 60 * 1000;
 
 const STATE_KEY = 'animal_company:update_tracker';
