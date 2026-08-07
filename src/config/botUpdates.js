@@ -1,16 +1,16 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '6.2.2',
+  version: '6.3.0',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
   newFeatures: [
-    'מעקב עדכוני Animal Company מחובר כעת לשרת ולערוץ הפרטיים הנכונים.',
+    'כרטיס מעקב Animal Company עוצב מחדש בסגנון AMB Tracker X.',
   ],
   fixes: [
-    'תוקן גם מזהה השרת המשויך לערוץ עדכוני Animal Company.',
+    'גרסת הבנייה וזמן הפרסום מזוהים ומוצגים בצורה ברורה ועדכנית.',
   ],
   improvements: [
-    'בדיקת הפריסה מאמתת יחד את מזהי השרת והערוץ לפני הפעלת המעקב.',
+    'נוספו תמונה ממוזערת, חותמות זמן מקומיות וסימון אדום בולט לעדכון חדש.',
   ],
   changelogUrl: null,
   imageUrl: null,

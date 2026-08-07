@@ -6,6 +6,7 @@ export const ANIMAL_COMPANY_GUILD_ID = '1502383010656288949';
 export const ANIMAL_COMPANY_CHANNEL_ID = '1502388916895088740';
 export const ANIMAL_COMPANY_NEWS_URL = `https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${ANIMAL_COMPANY_APP_ID}&count=10&maxlength=10000&format=json`;
 export const ANIMAL_COMPANY_STORE_URL = `https://store.steampowered.com/app/${ANIMAL_COMPANY_APP_ID}/Animal_Company/`;
+export const ANIMAL_COMPANY_THUMBNAIL_URL = `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${ANIMAL_COMPANY_APP_ID}/header.jpg`;
 export const ANIMAL_COMPANY_POLL_INTERVAL_MS = 15 * 60 * 1000;
 
 const STATE_KEY = 'animal_company:update_tracker';
@@ -49,16 +50,26 @@ export async function fetchAnimalCompanyUpdates(fetchImpl = globalThis.fetch) {
     .sort((a, b) => Number(a.date) - Number(b.date));
 }
 
-export function buildAnimalCompanyEmbed(item) {
-  const categories = categorizeReleaseNotes(item.contents);
-  const embed = new EmbedBuilder().setColor(0x69c36d).setTitle(`Animal Company — ${item.title}`.slice(0, 256))
-    .setURL(item.url || ANIMAL_COMPANY_STORE_URL).setTimestamp(new Date(Number(item.date) * 1000))
-    .setFooter({ text: 'Animal Company update tracker • EditIL Assistant' });
-  for (const [name, lines] of Object.entries(categories).slice(0, 6)) {
-    embed.addFields({ name, value: lines.slice(0, 5).map(line => `• ${line}`).join('\n').slice(0, 1024) });
-  }
-  if (!embed.data.fields?.length) embed.setDescription('A new Animal Company update is available. Open the release notes for details.');
-  return embed;
+export function extractAnimalCompanyVersion(item) {
+  const text = `${item?.title || ''}\n${item?.contents || ''}`;
+  return text.match(/\b\d+\.\d+(?:\.\d+){0,2}\b/)?.[0] || item?.title || 'Unknown';
+}
+
+export function buildAnimalCompanyEmbed(item, checkedAt = new Date()) {
+  const buildTimestamp = Math.floor(Number(item.date) || checkedAt.getTime() / 1000);
+  const version = extractAnimalCompanyVersion(item);
+  return new EmbedBuilder()
+    .setColor(0xed1c24)
+    .setAuthor({ name: 'AMB Tracker X' })
+    .setTitle('New Developer Build')
+    .setURL(item.url || ANIMAL_COMPANY_STORE_URL)
+    .setThumbnail(ANIMAL_COMPANY_THUMBNAIL_URL)
+    .addFields(
+      { name: '🟢 Updated Version:', value: `\`\`\`\n${version}\n\`\`\`` },
+      { name: '⏱️ Time of Dev Build:', value: `(<t:${buildTimestamp}:R>) <t:${buildTimestamp}:F>` },
+    )
+    .setFooter({ text: `Checked at ${checkedAt.toISOString()}` })
+    .setTimestamp(checkedAt);
 }
 
 async function resolveTargetChannel(client) {
