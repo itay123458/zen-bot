@@ -1,17 +1,16 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '6.2.0',
+  version: '6.2.1',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
   newFeatures: [
-    'נוסף מעקב אוטומטי אחר עדכוני Animal Company, כולל פריטים, מפות, אירועים, שינויי משחק ותיקונים.',
-    'נוספה פקודת בעלים ‎/ac mods‎ לבדיקה, הצגת מצב ופרסום ידני של עדכונים.',
+    'מעקב עדכוני Animal Company הועבר לערוץ הפרטי הנכון.',
   ],
   fixes: [
-    'נמנעת שליחה כפולה של אותו עדכון באמצעות שמירת מזהי העדכונים ב־PostgreSQL.',
+    'תוקן מזהה ערוץ היעד של הודעות Animal Company.',
   ],
   improvements: [
-    'הפקודה מוסתרת כברירת מחדל ומוגנת גם בבדיקת מזהה בעל הבוט בזמן ההפעלה.',
+    'הבדיקה האוטומטית ופקודת ‎/ac mods‎ משתמשות כעת באותו ערוץ יעד מתוקן.',
   ],
   changelogUrl: null,
   imageUrl: null,
