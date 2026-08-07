@@ -2,7 +2,7 @@ import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { logger } from '../utils/logger.js';
 
 export const ANIMAL_COMPANY_APP_ID = '4551040';
-export const ANIMAL_COMPANY_GUILD_ID = '1360426404386177154';
+export const ANIMAL_COMPANY_GUILD_ID = '1502383010656288949';
 export const ANIMAL_COMPANY_CHANNEL_ID = '1502388916895088740';
 export const ANIMAL_COMPANY_NEWS_URL = `https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${ANIMAL_COMPANY_APP_ID}&count=10&maxlength=10000&format=json`;
 export const ANIMAL_COMPANY_STORE_URL = `https://store.steampowered.com/app/${ANIMAL_COMPANY_APP_ID}/Animal_Company/`;

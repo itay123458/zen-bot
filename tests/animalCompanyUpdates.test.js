@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import command from '../src/commands/owner/ac.js';
-import { ANIMAL_COMPANY_CHANNEL_ID, categorizeReleaseNotes, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
+import { ANIMAL_COMPANY_CHANNEL_ID, ANIMAL_COMPANY_GUILD_ID, categorizeReleaseNotes, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
 
 test('/ac exposes an owner-oriented mods command group hidden by default', () => {
   const json = command.data.toJSON();
@@ -11,6 +11,7 @@ test('/ac exposes an owner-oriented mods command group hidden by default', () =>
 });
 
 test('tracker targets the configured private channel', () => {
+  assert.equal(ANIMAL_COMPANY_GUILD_ID, '1502383010656288949');
   assert.equal(ANIMAL_COMPANY_CHANNEL_ID, '1502388916895088740');
 });
 
