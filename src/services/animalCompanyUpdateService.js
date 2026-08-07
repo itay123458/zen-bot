@@ -8,6 +8,7 @@ export const ANIMAL_COMPANY_NEWS_URL = `https://api.steampowered.com/ISteamNews/
 export const ANIMAL_COMPANY_STORE_URL = `https://store.steampowered.com/app/${ANIMAL_COMPANY_APP_ID}/Animal_Company/`;
 export const ANIMAL_COMPANY_THUMBNAIL_URL = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4551040/8b86cf67d63d6bda4c71209070e0ff866d8e6bfe/capsule_616x353.jpg';
 export const ANIMAL_COMPANY_POLL_INTERVAL_MS = 15 * 60 * 1000;
+export const ANIMAL_COMPANY_QUEST_URL = 'https://queststoredb.com/game/animal-company-7190422614401072/';
 
 const STATE_KEY = 'animal_company:update_tracker';
 const categoryRules = [
@@ -50,6 +51,16 @@ export async function fetchAnimalCompanyUpdates(fetchImpl = globalThis.fetch) {
     .sort((a, b) => Number(a.date) - Number(b.date));
 }
 
+export async function fetchAnimalCompanyLiveBuild(fetchImpl = globalThis.fetch) {
+  const response = await fetchImpl(ANIMAL_COMPANY_QUEST_URL, { signal: AbortSignal.timeout(15_000) });
+  if (!response.ok) throw new Error(`Quest live-build request failed with HTTP ${response.status}`);
+  const html = await response.text();
+  const version = html.match(/"(?:softwareVersion|Version)"\s*:\s*"([^"]+)"/i)?.[1]
+    || html.match(/app version<\/td>\s*<td[^>]*>([^<]+)<\/td>/i)?.[1]?.trim();
+  if (!version || !/^\d+(?:\.\d+){2,3}$/.test(version)) throw new Error('Quest live-build response did not contain a valid version');
+  return { version, checkedAt: new Date() };
+}
+
 export function extractAnimalCompanyVersion(item) {
   const text = `${item?.title || ''}\n${item?.contents || ''}`;
   return text.match(/\b\d+\.\d+(?:\.\d+){0,2}\b/)?.[0] || item?.title || 'Unknown';
@@ -72,6 +83,25 @@ export function buildAnimalCompanyEmbed(item, checkedAt = new Date()) {
     .setTimestamp(checkedAt);
 }
 
+export function buildAnimalCompanyLiveEmbed({ version, previousVersion, releasedAt, checkedAt = new Date(), devBuildCount = 0 }) {
+  const releaseTimestamp = Math.floor(new Date(releasedAt).getTime() / 1000);
+  return new EmbedBuilder()
+    .setColor(0xed1c24)
+    .setAuthor({ name: 'AMB Tracker X' })
+    .setTitle('Update Detected')
+    .setDescription('**LIVE Build**')
+    .setURL(ANIMAL_COMPANY_QUEST_URL)
+    .addFields(
+      { name: '🟢 Updated Version:', value: `\`\`\`\n${version}\n\`\`\`` },
+      { name: '🔴 Last Logged:', value: `\`\`\`\n${previousVersion || 'Unknown'}\n\`\`\`` },
+      { name: '⏱️ Time of Live Release:', value: `(<t:${releaseTimestamp}:R>) <t:${releaseTimestamp}:F>`, inline: true },
+      { name: '🔨 Dev Builds Before Release:', value: `\`${devBuildCount}\` dev builds`, inline: true },
+    )
+    .setImage(ANIMAL_COMPANY_THUMBNAIL_URL)
+    .setFooter({ text: `Checked at ${checkedAt.toISOString()}` })
+    .setTimestamp(checkedAt);
+}
+
 async function resolveTargetChannel(client) {
   const guild = await client.guilds.fetch(ANIMAL_COMPANY_GUILD_ID).catch(() => null);
   if (!guild) return null;
@@ -86,26 +116,36 @@ export async function checkAnimalCompanyUpdates(client, { force = false } = {}) 
   if (!client.db?.isAvailable()) return { ok: false, code: 'database_unavailable', posted: 0 };
   const channel = await resolveTargetChannel(client);
   if (!channel) return { ok: false, code: 'target_unavailable', posted: 0 };
-  const updates = await fetchAnimalCompanyUpdates();
   const state = await client.db.get(STATE_KEY, { seenIds: [], initialized: false });
-  const seen = new Set(state.seenIds || []);
+  const live = await fetchAnimalCompanyLiveBuild();
   if (!state.initialized && !force) {
-    await client.db.set(STATE_KEY, { seenIds: updates.map(item => item.gid).slice(-50), initialized: true, lastCheckedAt: new Date().toISOString() });
+    await client.db.set(STATE_KEY, { ...state, initialized: true, liveVersion: live.version, liveReleasedAt: live.checkedAt.toISOString(), devBuildsSinceLive: state.devBuildsSinceLive || [], lastCheckedAt: live.checkedAt.toISOString() });
     return { ok: true, initialized: true, posted: 0 };
   }
-  const unseen = updates.filter(item => !seen.has(item.gid));
   let posted = 0;
-  for (const item of unseen) {
-    await channel.send({ embeds: [buildAnimalCompanyEmbed(item)], allowedMentions: { parse: [] } });
-    seen.add(item.gid);
+  if (state.liveVersion && state.liveVersion !== live.version) {
+    await channel.send({ embeds: [buildAnimalCompanyLiveEmbed({ version: live.version, previousVersion: state.liveVersion, releasedAt: live.checkedAt, checkedAt: live.checkedAt, devBuildCount: state.devBuildsSinceLive?.length || 0 })], allowedMentions: { parse: [] } });
     posted += 1;
   }
-  await client.db.set(STATE_KEY, { seenIds: [...seen].slice(-50), initialized: true, lastCheckedAt: new Date().toISOString(), lastPostAt: posted ? new Date().toISOString() : state.lastPostAt || null });
-  return { ok: true, posted, checked: updates.length };
+  await client.db.set(STATE_KEY, { ...state, initialized: true, liveVersion: live.version, liveReleasedAt: state.liveVersion === live.version ? state.liveReleasedAt : live.checkedAt.toISOString(), previousLiveVersion: state.liveVersion !== live.version ? state.liveVersion : state.previousLiveVersion, devBuildsSinceLive: state.liveVersion !== live.version ? [] : state.devBuildsSinceLive || [], lastCheckedAt: live.checkedAt.toISOString(), lastPostAt: posted ? live.checkedAt.toISOString() : state.lastPostAt || null });
+  return { ok: true, posted, liveVersion: live.version };
+}
+
+export async function recordAnimalCompanyDevBuild(client, version, recordedAt = new Date()) {
+  if (!client.db?.isAvailable()) return { ok: false, code: 'database_unavailable' };
+  const channel = await resolveTargetChannel(client);
+  if (!channel) return { ok: false, code: 'target_unavailable' };
+  const state = await client.db.get(STATE_KEY, { initialized: false, devBuildsSinceLive: [] });
+  if (state.devBuildsSinceLive?.at(-1)?.version === version) return { ok: true, duplicate: true, version };
+  const item = { title: version, contents: '', date: Math.floor(recordedAt.getTime() / 1000), url: ANIMAL_COMPANY_QUEST_URL };
+  const message = await channel.send({ embeds: [buildAnimalCompanyEmbed(item, recordedAt)], allowedMentions: { parse: [] } });
+  const devBuildsSinceLive = [...(state.devBuildsSinceLive || []), { version, recordedAt: recordedAt.toISOString(), messageId: message.id }].slice(-100);
+  await client.db.set(STATE_KEY, { ...state, initialized: true, devBuildsSinceLive, lastDevVersion: version, lastPostAt: recordedAt.toISOString(), lastCheckedAt: state.lastCheckedAt || recordedAt.toISOString() });
+  return { ok: true, version, messageId: message.id };
 }
 
 export async function getAnimalCompanyTrackerStatus(client) {
-  return client.db.get(STATE_KEY, { seenIds: [], initialized: false, lastCheckedAt: null, lastPostAt: null });
+  return client.db.get(STATE_KEY, { initialized: false, liveVersion: null, previousLiveVersion: null, lastDevVersion: null, devBuildsSinceLive: [], lastCheckedAt: null, lastPostAt: null });
 }
 
 export function startAnimalCompanyTracker(client) {

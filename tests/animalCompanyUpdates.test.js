@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import command from '../src/commands/owner/ac.js';
-import { ANIMAL_COMPANY_CHANNEL_ID, ANIMAL_COMPANY_GUILD_ID, ANIMAL_COMPANY_THUMBNAIL_URL, buildAnimalCompanyEmbed, categorizeReleaseNotes, extractAnimalCompanyVersion, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
+import { ANIMAL_COMPANY_CHANNEL_ID, ANIMAL_COMPANY_GUILD_ID, ANIMAL_COMPANY_THUMBNAIL_URL, buildAnimalCompanyEmbed, buildAnimalCompanyLiveEmbed, categorizeReleaseNotes, extractAnimalCompanyVersion, fetchAnimalCompanyLiveBuild, fetchAnimalCompanyUpdates, releaseNoteLines } from '../src/services/animalCompanyUpdateService.js';
 
 test('/ac exposes an owner-oriented mods command group hidden by default', () => {
   const json = command.data.toJSON();
   assert.equal(json.name, 'ac');
   assert.equal(json.default_member_permissions, '0');
-  assert.deepEqual(json.options[0].options.map(option => option.name), ['check', 'status', 'post']);
+  assert.deepEqual(json.options[0].options.map(option => option.name), ['check', 'status', 'dev-build', 'post']);
 });
 
 test('tracker targets the configured private channel', () => {
@@ -29,6 +29,11 @@ test('Steam updates are normalized oldest first', async () => {
   assert.deepEqual((await fetchAnimalCompanyUpdates(fakeFetch)).map(item => item.gid), ['1', '2']);
 });
 
+test('public Quest listing yields the live build version', async () => {
+  const fakeFetch = async () => ({ ok: true, text: async () => '<script>{"softwareVersion": "1.85.2.3320"}</script>' });
+  assert.equal((await fetchAnimalCompanyLiveBuild(fakeFetch)).version, '1.85.2.3320');
+});
+
 test('developer build embed matches the compact AMB tracker card', () => {
   const item = { title: 'AC 1.86.0.3325', contents: '', date: 1786104300, url: 'https://example.com/update' };
   const checkedAt = new Date('2026-08-07T09:05:05.000Z');
@@ -42,4 +47,14 @@ test('developer build embed matches the compact AMB tracker card', () => {
   assert.equal(json.fields[0].value, '```\n1.86.0.3325\n```');
   assert.match(json.fields[1].value, /^\(<t:\d+:R>\) <t:\d+:F>$/);
   assert.equal(json.footer.text, 'Checked at 2026-08-07T09:05:05.000Z');
+});
+
+test('live build embed includes previous version and dev-build count', () => {
+  const json = buildAnimalCompanyLiveEmbed({ version: '1.85.2.3320', previousVersion: '1.85.1.3312', releasedAt: '2026-08-07T14:43:48Z', checkedAt: new Date('2026-08-07T14:43:48Z'), devBuildCount: 7 }).toJSON();
+  assert.equal(json.title, 'Update Detected');
+  assert.equal(json.description, '**LIVE Build**');
+  assert.equal(json.fields[0].value, '```\n1.85.2.3320\n```');
+  assert.equal(json.fields[1].value, '```\n1.85.1.3312\n```');
+  assert.equal(json.fields[3].value, '`7` dev builds');
+  assert.equal(json.image.url, ANIMAL_COMPANY_THUMBNAIL_URL);
 });
