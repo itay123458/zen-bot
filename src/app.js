@@ -39,7 +39,6 @@ import { initializeDatabase } from './utils/database.js';
 import { getGuildConfig } from './services/guildConfig.js';
 import { logger, startupLog, shutdownLog } from './utils/logger.js';
 import { loadCommands, registerCommands as registerSlashCommands } from './handlers/commandLoader.js';
-import { startAnimalCompanyTracker } from './services/animalCompanyUpdateService.js';
 
 class TitanBot extends Client {
   constructor() {
@@ -440,7 +439,7 @@ class TitanBot extends Client {
   }
 
   setupCronJobs() {
-    startAnimalCompanyTracker(this);
+    // Reserved for future scheduled tasks.
   }
 
   async loadHandlers() {
@@ -499,7 +498,6 @@ class TitanBot extends Client {
     logger.info(`${'='.repeat(60)}`);
 
     try {
-      if (this.animalCompanyTimer) clearInterval(this.animalCompanyTimer);
       
 
       // Close database connection

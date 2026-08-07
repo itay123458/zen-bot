@@ -1,17 +1,16 @@
 export const DEFAULT_UPDATE_CHANNEL_ID = '1527004410536923357';
 
 export const DEFAULT_UPDATE_CONTENT = Object.freeze({
-  version: '6.4.0',
+  version: '6.4.1',
   title: '🤖 עדכון חדש ל־EditIL Assistant',
   newFeatures: [
-    'נוסף מעקב אוטומטי אחר גרסת ה־Live הציבורית של Animal Company ב־Meta Quest.',
-    'נוספה פקודת ‎/ac mods dev-build‎ לתיעוד ופרסום מדויק של גרסאות פיתוח.',
+    'מודול Animal Company והפקודה ‎/ac mods‎ הוסרו מ־EditIL Assistant לבקשת הבעלים.',
   ],
   fixes: [
-    'המערכת שומרת את גרסת ה־Live הקודמת ומונעת פרסומים כפולים.',
+    'הופסקו בדיקות הרקע והפרסומים האוטומטיים של Animal Company.',
   ],
   improvements: [
-    'כרטיס Live מציג את מספר גרסאות הפיתוח שנרשמו לפני השחרור ואת זמני הבנייה המקומיים.',
+    'נוקו חיבורי ההפעלה והאחסון של מעקב Animal Company.',
   ],
   changelogUrl: null,
   imageUrl: null,
