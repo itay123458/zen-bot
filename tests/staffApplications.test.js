@@ -84,6 +84,9 @@ test('public command grid cannot create horizontal page overflow', async () => {
   assert.match(worker, /cachePublicResponse/);
   assert.match(worker, /sitemap\.xml/);
   assert.match(worker, /favicon\.ico/);
+  assert.match(worker, /\.well-known\/security\.txt/);
+  assert.match(worker, /apple-touch-icon\.png/);
+  assert.match(worker, /url\.hostname === 'www\.editil\.com'/);
 });
 
 test('custom animated background stays lightweight and accessible', async () => {

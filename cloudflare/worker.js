@@ -80,13 +80,26 @@ const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
   <url><loc>https://editil.com/accessibility</loc></url>
 </urlset>`;
 
+const SECURITY_TXT = `Contact: https://discord.gg/6Hu8xpTYqQ
+Expires: 2027-08-14T00:00:00.000Z
+Preferred-Languages: he, en
+Canonical: https://editil.com/.well-known/security.txt
+Policy: https://editil.com/security
+`;
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.hostname === 'www.editil.com') {
+      url.hostname = 'editil.com';
+      return Response.redirect(url.toString(), 308);
+    }
     if (url.pathname === '/' || url.pathname === '/index.html') return siteResponse(indexHtml, 'text/html');
     if (url.pathname === '/favicon.ico') return Response.redirect(`${url.origin}/favicon.svg`, 308);
+    if (['/apple-touch-icon.png', '/apple-touch-icon-precomposed.png'].includes(url.pathname)) return Response.redirect(`${url.origin}/favicon.svg`, 308);
     if (url.pathname === '/robots.txt') return siteResponse(ROBOTS, 'text/plain', 'public, max-age=3600, s-maxage=86400');
     if (url.pathname === '/sitemap.xml') return siteResponse(SITEMAP, 'application/xml', 'public, max-age=3600, s-maxage=86400');
+    if (url.pathname === '/.well-known/security.txt') return siteResponse(SECURITY_TXT, 'text/plain', 'public, max-age=3600, s-maxage=86400');
     if (['/legal/privacy-notice-v1', '/privacy-policy.html', '/privacy.html', '/privacy'].includes(url.pathname)) return legalResponse(privacyHtml, 'text/html');
     if (['/legal/terms-of-use-v1', '/terms-of-use.html', '/terms.html', '/terms'].includes(url.pathname)) return legalResponse(termsHtml, 'text/html');
     if (['/legal/security-v1', '/security.html', '/security'].includes(url.pathname)) return legalResponse(securityHtml, 'text/html');
