@@ -71,10 +71,11 @@ test('public command grid cannot create horizontal page overflow', async () => {
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8'),
     readFile(new URL('../cloudflare/worker.js', import.meta.url), 'utf8')
   ]);
-    assert.match(html, /premium\.css\?v=7\.0\.0/);
+    assert.match(html, /premium\.css\?v=7\.0\.1/);
     assert.doesNotMatch(html, /class="editor-stage/);
     assert.match(html, /class="creative-ticker"/);
   assert.match(css, /html,body \{[^}]*overflow-x: clip/);
+  assert.match(css, /body \{[^}]*touch-action: pan-y/);
   assert.match(css, /\.commands-section \{[^}]*overflow-x: clip/);
   assert.match(css, /\.commands-section > \.shell \{[^}]*margin-inline: auto/);
   assert.match(css, /\.public-command-grid \{[^}]*repeat\(3,minmax\(0,1fr\)\)/);
@@ -87,6 +88,20 @@ test('public command grid cannot create horizontal page overflow', async () => {
   assert.match(worker, /\.well-known\/security\.txt/);
   assert.match(worker, /apple-touch-icon\.png/);
   assert.match(worker, /url\.hostname === 'www\.editil\.com'/);
+});
+
+test('landing navigation remains vertical-only on every viewport', async () => {
+  const [html, css, script] = await Promise.all([
+    readFile(new URL('../public/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
+  ]);
+  assert.doesNotMatch(css, /scroll-snap-type:\s*x|overflow-x:\s*auto|100vw/);
+  assert.match(css, /touch-action:\s*pan-y/);
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*?\.explore-grid \{[^}]*grid-template-columns: 1fr/);
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*?\.command-filters \{[^}]*flex-wrap: wrap/);
+  assert.doesNotMatch(script, /addEventListener\(['"]wheel|addEventListener\(['"]touchmove/);
+  assert.doesNotMatch(html, /data-horizontal|horizontal-scroll/);
 });
 
 test('custom animated background stays lightweight and accessible', async () => {
@@ -139,11 +154,11 @@ test('premium v6 redesign stays responsive, lightweight and motion accessible', 
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=7\.0\.0/);
+  assert.match(html, /premium\.css\?v=7\.0\.1/);
   assert.match(html, /קהילת העורכים/);
   assert.match(html, /הבית של כל יוצר תוכן, עורך וידאו ומעצב/);
   assert.match(html, /class="hero-float/);
-  assert.match(css, /scroll-snap-type: x mandatory/);
+  assert.doesNotMatch(css, /scroll-snap-type:\s*x|overflow-x:\s*auto|100vw/);
   assert.match(css, /perspective:\s*1500px/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /(^|[},])\s*canvas\s*\{|animation:\s*[^;]*box-shadow/i);
@@ -161,7 +176,7 @@ test('premium hero uses an accessible cinematic monitor carousel', async () => {
     readFile(new URL('../public/premium.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/landing.js', import.meta.url), 'utf8')
   ]);
-  assert.match(html, /premium\.css\?v=7\.0\.0/);
+  assert.match(html, /premium\.css\?v=7\.0\.1/);
   assert.equal((html.match(/data-reel-slide/g) || []).length, 3);
   assert.equal((html.match(/data-reel-dot=/g) || []).length, 3);
   assert.match(html, /aria-roledescription="carousel"/);
