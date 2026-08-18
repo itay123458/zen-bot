@@ -220,6 +220,12 @@ img { max-width: 100%; height: auto; }
 .explore-grid button div b { margin-bottom: 6px; font-size: 1.05rem; }
 .explore-grid button div small { color: #7d859c; line-height: 1.45; }
 .explore-grid button > i { position: absolute; top: 24px; left: 22px; color: #667089; font-style: normal; }
+.explore-grid .server-explore { border-color: rgba(89,227,255,.2); background: linear-gradient(155deg,rgba(29,42,66,.95),rgba(16,18,34,.95)); }
+.explore-grid .server-explore > i { padding: 4px 8px; border-radius: 999px; background: rgba(89,227,255,.1); color: var(--cyan); font-size: .62rem; font-weight: 800; }
+.server-map { margin-top: 16px; padding: 16px; display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 8px; border: 1px solid rgba(255,255,255,.075); border-radius: 22px; background: rgba(12,15,25,.68); }
+.server-map > div { min-width: 0; min-height: 72px; padding: 10px 6px; display: grid; place-content: center; justify-items: center; gap: 6px; text-align: center; border-radius: 14px; background: rgba(255,255,255,.03); }
+.server-map span { font-size: 1.2rem; }
+.server-map b { color: #aeb5c9; font-size: .68rem; }
 
 .join-section { position: relative; width: min(1240px,calc(100% - 56px)); min-height: 420px; margin: 50px auto 110px; padding: 70px 30px; display: grid; place-content: center; justify-items: center; overflow: hidden; text-align: center; border: 1px solid rgba(255,255,255,.1); border-radius: 48px; background: radial-gradient(circle at 50% 120%,rgba(89,227,255,.18),transparent 42%),linear-gradient(125deg,rgba(88,101,242,.22),rgba(17,21,35,.98) 54%,rgba(124,92,255,.13)); box-shadow: var(--shadow); }
 .join-section::before,.join-section::after { content: ""; position: absolute; width: 420px; height: 420px; border: 1px solid rgba(255,255,255,.07); border-radius: 50%; }
@@ -407,6 +413,8 @@ dialog { color: var(--text); }
   .explore-section { width: calc(100% - 24px); padding-inline: 0; overflow: visible; }
   .explore-grid { width: 100%; display: grid; grid-template-columns: 1fr; gap: 11px; padding: 0; overflow: visible; }
   .explore-grid button { width: 100%; min-width: 0; min-height: 150px; }
+  .server-map { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .server-map > div:last-child { grid-column: 1/-1; }
   .explore-grid button:nth-child(odd),.explore-grid button:nth-child(odd):hover { transform: none; }
   .join-section { width: calc(100% - 24px); min-height: 440px; margin-block: 45px 85px; padding: 55px 20px; border-radius: 28px; }
   .join-section h2 { font-size: clamp(4rem,19vw,5.8rem); }
