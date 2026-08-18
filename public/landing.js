@@ -45,7 +45,12 @@
   const navLinks = $$('.site-header nav a[href^="#"]');
   const sectionObserver = new IntersectionObserver(entries => entries.forEach(entry => {
     if (!entry.isIntersecting) return;
-    navLinks.forEach(link => link.classList.toggle('is-active', link.hash === `#${entry.target.id}`));
+    navLinks.forEach(link => {
+      const active = link.hash === `#${entry.target.id}`;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
   }), { rootMargin: '-30% 0px -60%', threshold: 0 });
   navLinks.forEach(link => {
     const target = $(link.hash);
