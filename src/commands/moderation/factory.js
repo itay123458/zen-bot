@@ -9,6 +9,7 @@ import { warningKey } from '../../modules/community/store.js';
 import { requireAccess, AccessLevel } from '../../modules/community/permissions.js';
 import { logEvent } from '../../services/loggingService.js';
 import logger from '../../utils/logger.js';
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 const EPHEMERAL = MessageFlags.Ephemeral;
 const MAX_DURATION_MS = 28 * 86_400_000;
@@ -199,9 +200,15 @@ async function manageChannelPermission(name, interaction, client) {
     const overwrite = channel.permissionOverwrites.cache.get(interaction.guild.roles.everyone.id);
     const previous = overwrite?.allow.has(permission) ? true : overwrite?.deny.has(permission) ? false : null;
     await client.db.set(key, { previous, by: interaction.user.id, at: Date.now() });
-    await channel.permissionOverwrites.edit(interaction.guild.roles.everyone, { [property]: false }, {
-      reason: auditReason(interaction, isVisibility ? 'הסתרת ערוץ' : 'נעילת ערוץ'),
-    });
+    try {
+      await channel.permissionOverwrites.edit(interaction.guild.roles.everyone, { [property]: false }, {
+        reason: auditReason(interaction, isVisibility ? 'הסתרת ערוץ' : 'נעילת ערוץ'),
+      });
+    } catch (error) {
+      // A rejected Discord update must not leave a false "already locked" state.
+      await client.db.delete(key);
+      throw error;
+    }
     await sendActionLog(interaction, isVisibility ? 'channel.change' : 'moderation.lock', isVisibility ? 'הסתרת ערוץ' : 'נעילת ערוץ', null, 'לא צוינה סיבה', [
       { name: 'ערוץ', value: `${channel} (\`${channel.id}\`)`, inline: true },
     ]);
@@ -318,13 +325,21 @@ async function executeCommand(name, interaction, client) {
       return true;
     }).first(amount);
     if (!selected.length) return respond(interaction, 'לא נמצאו הודעות שמתאימות למסננים.', 'warning');
-    const deleted = await interaction.channel.bulkDelete(selected, true);
+    const cutoff = Date.now() - 14 * 86_400_000;
+    const recent = selected.filter(message => message.createdTimestamp > cutoff);
+    const skippedOld = selected.length - recent.length;
+    const deleted = recent.length
+      ? await interaction.channel.bulkDelete(recent, true)
+      : { size: 0 };
     await sendActionLog(interaction, 'moderation.purge', 'מחיקת הודעות', selectedUser, 'ניקוי ערוץ', [
       { name: 'ערוץ', value: `${interaction.channel} (\`${interaction.channelId}\`)`, inline: true },
       { name: 'כמות', value: String(deleted.size), inline: true },
       { name: 'מסנן', value: type, inline: true },
     ]);
-    return respond(interaction, `נמחקו **${deleted.size}** הודעות.`);
+    return respond(interaction, `נמחקו **${deleted.size}** הודעות.`
+      + (skippedOld ? `\nדולגו **${skippedOld}** הודעות בנות 14 ימים ומעלה, שלא ניתן למחוק במחיקה קבוצתית.` : '')
+      + '\nנבדקו עד 100 ההודעות האחרונות בערוץ; הודעות נעוצות נשמרו.',
+    deleted.size ? 'success' : 'warning');
   }
   if (name === 'unban') {
     const id = interaction.options.getString('user_id');
@@ -404,6 +419,8 @@ export function moderationCommand(name) {
     data: buildData(name),
     async execute(interaction, client) {
       try {
+        InteractionHelper.patchInteractionResponses(interaction);
+        if (!await InteractionHelper.safeDefer(interaction, { flags: EPHEMERAL })) return;
         return await executeCommand(name, interaction, client);
       } catch (error) {
         logger.error('Moderation command failed', {
