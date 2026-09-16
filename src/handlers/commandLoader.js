@@ -156,6 +156,9 @@ const registeredNames = new Set();
                 if (!registeredNames.has(commandName)) {
                     registeredNames.add(commandName);
                     const commandJson = command.data.toJSON();
+                    // Enforce these requirements in the interaction router so the
+                    // canonical bot owner can invoke commands without guild roles.
+                    commandJson.default_member_permissions = null;
                     // Allow user-installed app usage in servers (0), bot DMs (1), and group DMs (2)
                     commandJson.integration_types = [0, 1];
                     commandJson.contexts = [0, 1, 2];

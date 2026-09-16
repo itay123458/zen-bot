@@ -6,6 +6,7 @@
 import { PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { logger } from './logger.js';
 import { errorEmbed } from './embeds.js';
+import { BOT_OWNER_USER_ID } from '../config/owner.js';
 
 
 
@@ -66,16 +67,18 @@ export async function checkUserPermissions(
   requiredPermissions,
   errorMessage = 'You do not have permission to use this command.'
 ) {
+  if (interaction.user?.id === BOT_OWNER_USER_ID) return true;
   const member = interaction.member;
+  const permissions = interaction.memberPermissions ?? member?.permissions;
   
-  if (!member.permissions.has(requiredPermissions)) {
+  if (!permissions?.has(requiredPermissions)) {
     await interaction.reply({
       embeds: [errorEmbed('Permission Denied', errorMessage)],
       flags: MessageFlags.Ephemeral
     });
     
     logger.warn(
-      `[PERMISSION_DENIED] User ${member.id} attempted command ${interaction.commandName} in guild ${interaction.guildId}`
+      `[PERMISSION_DENIED] User ${interaction.user?.id} attempted command ${interaction.commandName} in guild ${interaction.guildId}`
     );
     return false;
   }
@@ -187,5 +190,4 @@ export default {
   checkBotPermissions,
   auditPermissionCheck
 };
-
 

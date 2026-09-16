@@ -3,6 +3,7 @@ import { logger } from '../utils/logger.js';
 import { createEmbed } from '../utils/embeds.js';
 import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { enforceCommandChannel } from '../services/commandChannelPolicy.js';
+import { checkUserPermissions } from '../utils/permissionGuard.js';
 
 export default {
   name: Events.InteractionCreate,
@@ -11,6 +12,10 @@ export default {
       if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);
         if (!command) throw new Error(`Unknown command: ${interaction.commandName}`);
+        const requiredPermissions = command.data.default_member_permissions;
+        if (requiredPermissions != null && !await checkUserPermissions(
+          interaction, BigInt(requiredPermissions), 'אין לך הרשאה להשתמש בפקודה זו.'
+        )) return;
         if (!await enforceCommandChannel(interaction, command, client)) return;
         await command.execute(interaction, client);
         return;

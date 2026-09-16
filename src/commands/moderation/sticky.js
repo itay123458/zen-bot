@@ -1,4 +1,5 @@
 import { ChannelType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { BOT_OWNER_USER_ID } from '../../config/owner.js';
 import {
   getStickyMessage,
   publishStickyMessage,
@@ -43,7 +44,7 @@ export default {
         .addChannelTypes(ChannelType.GuildText))),
 
   async execute(interaction, client) {
-    if (!interaction.inGuild() || !interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+    if (!interaction.inGuild() || (interaction.user.id !== BOT_OWNER_USER_ID && !interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages))) {
       return interaction.reply(ephemeral('אין לך הרשאה לנהל הודעות מוצמדות.'));
     }
 

@@ -28,6 +28,7 @@ export async function requireAccess(interaction, client, defaultLevel, commandKe
     await interaction.reply({ embeds: [createEmbed({ title: 'פקודה לא זמינה', description: 'ניתן להשתמש בפקודה זו רק בתוך שרת.', color: 'error' })], flags: MessageFlags.Ephemeral });
     return false;
   }
+  if (interaction.user.id === BOT_OWNER_USER_ID) return true;
   const config = await getConfig(client, interaction.guildId);
   const setting = config.commandSettings?.[commandKey] || config.commandSettings?.[interaction.commandName];
   if (setting?.enabled === false) {
