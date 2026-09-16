@@ -6,6 +6,21 @@ import roles from '../src/commands/roles/roles.js';
 import rolepanel from '../src/commands/admin/rolepanel.js';
 import settings from '../src/commands/admin/settings.js';
 import { panelPayload, roleTemplates, validateRoleAction } from '../src/services/roleSystemService.js';
+import { BOT_OWNER_USER_ID } from '../src/config/owner.js';
+
+test('bot owner can manage roles above their own while Discord role limits remain enforced', async () => {
+  const guild = { id: 'guild', ownerId: 'server-owner', members: { me: {
+    permissions: new PermissionsBitField(PermissionFlagsBits.ManageRoles), roles: { highest: { position: 10 } },
+  } } };
+  const owner = { id: BOT_OWNER_USER_ID, roles: { highest: { position: 2 } } };
+  const target = { id: 'role', position: 5, permissions: new PermissionsBitField() };
+  assert.equal(await validateRoleAction(guild, owner, target), null);
+  assert.match(await validateRoleAction(guild, { ...owner, id: 'staff' }, target), /מעל התפקיד שלך/);
+  assert.match(await validateRoleAction(guild, owner, { ...target, position: 10 }), /הבוט/);
+  assert.match(await validateRoleAction(guild, owner, { ...target, managed: true }), /Discord/);
+  guild.members.me.permissions = new PermissionsBitField();
+  assert.match(await validateRoleAction(guild, owner, target), /חסרה הרשאת/);
+});
 import buttonHandlers from '../src/modules/interactions/buttons/role_system.js';
 import selectHandlers from '../src/modules/interactions/selectMenus/role_system.js';
 

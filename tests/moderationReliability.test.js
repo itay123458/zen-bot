@@ -2,6 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ChannelType, Collection, MessageFlags } from 'discord.js';
 import { moderationCommand } from '../src/commands/moderation/factory.js';
+import { BOT_OWNER_USER_ID } from '../src/config/owner.js';
+
+for (const [actorId, targetPosition, allowed] of [
+  [BOT_OWNER_USER_ID, 5, true], ['moderator', 5, false], [BOT_OWNER_USER_ID, 10, false],
+]) {
+  test(`moderation hierarchy: actor ${actorId}, target position ${targetPosition}, allowed ${allowed}`, async () => {
+    const f = fixture('kick');
+    let kicked = false;
+    const target = { id: 'target', roles: { highest: { position: targetPosition } },
+      kickable: true, kick: async () => { kicked = true; } };
+    f.client.user = { id: 'bot' };
+    f.interaction.user.id = actorId;
+    f.interaction.member.roles = { highest: { position: 2 } };
+    f.interaction.guild.ownerId = 'server-owner';
+    f.interaction.guild.members.me.roles = { highest: { position: 10 } };
+    f.interaction.guild.members.fetch = async () => target;
+    f.interaction.options.getUser = () => ({ id: 'target', send: async () => {} });
+    await moderationCommand('kick').execute(f.interaction, f.client);
+    assert.equal(kicked, allowed);
+  });
+}
 
 function fixture(name, messages = []) {
   const records = new Map();

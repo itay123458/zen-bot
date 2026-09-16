@@ -10,6 +10,7 @@ import { requireAccess, AccessLevel } from '../../modules/community/permissions.
 import { logEvent } from '../../services/loggingService.js';
 import logger from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { BOT_OWNER_USER_ID } from '../../config/owner.js';
 
 const EPHEMERAL = MessageFlags.Ephemeral;
 const MAX_DURATION_MS = 28 * 86_400_000;
@@ -157,7 +158,8 @@ function targetError(interaction, member) {
   if (member.id === interaction.user.id) return 'לא ניתן לבצע את הפעולה על עצמך.';
   if (member.id === interaction.client.user.id) return 'לא ניתן לבצע את הפעולה על EditIL Assistant.';
   if (member.roles.highest.position >= interaction.member.roles.highest.position
-    && interaction.user.id !== interaction.guild.ownerId) return 'תפקיד החבר שווה או גבוה מהתפקיד הגבוה ביותר שלך.';
+    && interaction.user.id !== interaction.guild.ownerId
+    && interaction.user.id !== BOT_OWNER_USER_ID) return 'תפקיד החבר שווה או גבוה מהתפקיד הגבוה ביותר שלך.';
   if (member.roles.highest.position >= interaction.guild.members.me.roles.highest.position) return 'התפקיד של EditIL Assistant נמוך מדי בהיררכיית התפקידים.';
   return null;
 }

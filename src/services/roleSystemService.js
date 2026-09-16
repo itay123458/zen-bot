@@ -3,6 +3,7 @@ import { createEmbed } from '../utils/embeds.js';
 import { getConfig } from '../modules/community/store.js';
 import { logger } from '../utils/logger.js';
 import { logEvent, EVENT_TYPES } from './loggingService.js';
+import { BOT_OWNER_USER_ID } from '../config/owner.js';
 
 export const PANEL_CATEGORIES = Object.freeze({ software: 'תוכנות עריכה', editing: 'סוגי עריכה', notifications: 'התראות', languages: 'שפות' });
 export const panelKey = (guildId, id) => `community:${guildId}:rolepanel:${id}`;
@@ -16,7 +17,7 @@ export async function validateRoleAction(guild, actor, role, { selfAssignable = 
   if (!role || role.id === guild.id) return fail('לא ניתן לנהל את התפקיד @everyone.');
   if (role.managed || role.tags?.botId || role.tags?.integrationId || role.tags?.premiumSubscriberRole) return fail('לא ניתן לנהל תפקיד שמנוהל על ידי Discord או אינטגרציה.');
   if (role.position >= guild.members.me.roles.highest.position) return fail('תפקיד הבוט נמוך מדי בהיררכיית התפקידים.');
-  if (!selfAssignable && actor?.id !== guild.ownerId && role.position >= actor.roles.highest.position) return fail('לא ניתן לנהל תפקיד שממוקם מעל התפקיד שלך.');
+  if (!selfAssignable && actor?.id !== BOT_OWNER_USER_ID && actor?.id !== guild.ownerId && role.position >= actor.roles.highest.position) return fail('לא ניתן לנהל תפקיד שממוקם מעל התפקיד שלך.');
   if (role.permissions.has(PermissionFlagsBits.Administrator) && !(allowAdministrator && actor?.id === guild.ownerId)) return fail('לא ניתן לנהל תפקיד בעל הרשאת Administrator.');
   if (selfAssignable) {
     const config = await getConfig(guild.client, guild.id);
