@@ -26,7 +26,7 @@ export default { data, async execute(interaction, client) {
     const member = interaction.options.getMember('member'); const error = await validateRoleAction(interaction.guild, interaction.member, role);
     if (error) return interaction.reply({ content: error, flags: MessageFlags.Ephemeral });
     const config = await getConfig(client, interaction.guildId);
-    if (member.id === interaction.guild.ownerId || (member.id === interaction.user.id && Object.values(config.staffRoles).includes(role.id))) return interaction.reply({ content: 'לא ניתן לשנות הרשאות צוות של עצמך או של בעל השרת.', flags: MessageFlags.Ephemeral });
+    if (interaction.user.id !== BOT_OWNER_USER_ID && (member.id === interaction.guild.ownerId || (member.id === interaction.user.id && Object.values(config.staffRoles).includes(role.id)))) return interaction.reply({ content: 'לא ניתן לשנות הרשאות צוות של עצמך או של בעל השרת.', flags: MessageFlags.Ephemeral });
     const reason = interaction.options.getString('reason') || `בוצע על ידי ${interaction.user.tag}`;
     await member.roles[sub === 'add' ? 'add' : 'remove'](role, reason);
     await logEvent({ client, guildId: interaction.guildId, eventType: EVENT_TYPES.ROLE_UPDATE, data: { title: sub === 'add'?'תפקיד נוסף':'תפקיד הוסר', description:`${role} ${sub==='add'?'נוסף אל':'הוסר מאת'} ${member}.`, fields:[{name:'צוות',value:`${interaction.user}`},{name:'סיבה',value:reason}] } });

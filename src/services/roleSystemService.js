@@ -18,7 +18,8 @@ export async function validateRoleAction(guild, actor, role, { selfAssignable = 
   if (role.managed || role.tags?.botId || role.tags?.integrationId || role.tags?.premiumSubscriberRole) return fail('לא ניתן לנהל תפקיד שמנוהל על ידי Discord או אינטגרציה.');
   if (role.position >= guild.members.me.roles.highest.position) return fail('תפקיד הבוט נמוך מדי בהיררכיית התפקידים.');
   if (!selfAssignable && actor?.id !== BOT_OWNER_USER_ID && actor?.id !== guild.ownerId && role.position >= actor.roles.highest.position) return fail('לא ניתן לנהל תפקיד שממוקם מעל התפקיד שלך.');
-  if (role.permissions.has(PermissionFlagsBits.Administrator) && !(allowAdministrator && actor?.id === guild.ownerId)) return fail('לא ניתן לנהל תפקיד בעל הרשאת Administrator.');
+  const ownerManagement = !selfAssignable && actor?.id === BOT_OWNER_USER_ID;
+  if (role.permissions.has(PermissionFlagsBits.Administrator) && !ownerManagement && !(allowAdministrator && actor?.id === guild.ownerId)) return fail('לא ניתן לנהל תפקיד בעל הרשאת Administrator.');
   if (selfAssignable) {
     const config = await getConfig(guild.client, guild.id);
     const protectedIds = new Set(Object.values(config.staffRoles || {}).filter(Boolean));

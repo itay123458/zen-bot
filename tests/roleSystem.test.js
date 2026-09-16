@@ -8,6 +8,43 @@ import settings from '../src/commands/admin/settings.js';
 import { panelPayload, roleTemplates, validateRoleAction } from '../src/services/roleSystemService.js';
 import { BOT_OWNER_USER_ID } from '../src/config/owner.js';
 
+for (const action of ['add', 'remove']) {
+  for (const targetId of ['member', BOT_OWNER_USER_ID, 'server-owner']) {
+    test(`bot owner can ${action} an Administrator staff role for ${targetId}`, async () => {
+      const adminRole = { id: 'admin-role', position: 5, permissions: new PermissionsBitField(PermissionFlagsBits.Administrator) };
+      const assignments = new Set(action === 'remove' ? [adminRole.id] : []);
+      const target = { id: targetId, roles: {
+        add: async assignedRole => assignments.add(assignedRole.id),
+        remove: async assignedRole => assignments.delete(assignedRole.id),
+      } };
+      const client = { db: { get: async (_key, fallback) => ({ ...fallback, staffRoles: { administrator: adminRole.id } }) } };
+      let response;
+      await role.execute({ user: { id: BOT_OWNER_USER_ID, tag: 'Owner' },
+        member: { id: BOT_OWNER_USER_ID, permissions: new PermissionsBitField(), roles: { highest: { position: 2 } } },
+        guildId: 'guild', commandName: 'role', inGuild: () => true,
+        guild: { id: 'guild', ownerId: 'server-owner', members: { me: {
+          permissions: new PermissionsBitField(PermissionFlagsBits.ManageRoles), roles: { highest: { position: 10 } },
+        } } },
+        options: { getSubcommand: () => action, getRole: () => adminRole, getMember: () => target, getString: () => null },
+        reply: async payload => { response = payload; },
+      }, client);
+      assert.equal(assignments.has(adminRole.id), action === 'add', response?.content);
+      assert.match(response.content, /בהצלחה/);
+    });
+  }
+}
+
+test('Administrator role access remains blocked for other staff and self-role panels', async () => {
+  const guild = { id: 'guild', ownerId: 'server-owner', members: { me: {
+    permissions: new PermissionsBitField(PermissionFlagsBits.ManageRoles), roles: { highest: { position: 10 } },
+  } } };
+  const role = { id: 'admin', position: 5, permissions: new PermissionsBitField(PermissionFlagsBits.Administrator) };
+  const actor = { id: 'staff', roles: { highest: { position: 9 } } };
+  assert.match(await validateRoleAction(guild, actor, role), /Administrator/);
+  assert.match(await validateRoleAction(guild, { ...actor, id: BOT_OWNER_USER_ID }, role, { selfAssignable: true }), /Administrator/);
+  assert.match(await validateRoleAction(guild, { ...actor, id: BOT_OWNER_USER_ID }, { ...role, position: 10 }), /הבוט/);
+});
+
 test('bot owner can manage roles above their own while Discord role limits remain enforced', async () => {
   const guild = { id: 'guild', ownerId: 'server-owner', members: { me: {
     permissions: new PermissionsBitField(PermissionFlagsBits.ManageRoles), roles: { highest: { position: 10 } },
